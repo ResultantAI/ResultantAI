@@ -1,16 +1,13 @@
-## Hi there 👋
+# 👋 Welcome to ResultantAI's GitHub
+🚀 **AI-Powered Sales & Marketing Automation**  
 
-<!--
-**ResultantAI/ResultantAI** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+We specialize in **AI-driven automation** for lead generation, CRM enrichment, and outbound sales at scale.
 
-Here are some ideas to get you started:
+## 🔥 Key Projects:
+- **ClientFlow AI**: AI-powered **lead scoring & automation**
+- **AI Cold Email Generator**: Automates outreach at scale
+- **AI CRM Enrichment**: Enhances Salesforce/HubSpot with AI  
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+💡 **Want to collaborate?** Reach out below 👇  
+
+📩 [Email Us](mailto:contact@resultantai.com) | 🌐 [Visit ResultantAI](https://www.resultantai.com)  
