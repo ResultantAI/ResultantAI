@@ -17,7 +17,7 @@ import sys
 import json
 import argparse
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 from dotenv import load_dotenv
 import anthropic
@@ -323,7 +323,7 @@ def format_output(audit_results: Dict[str, Any], url: str, industry: str) -> Dic
     """
     return {
         'audit_metadata': {
-            'timestamp': datetime.utcnow().isoformat() + 'Z',
+            'timestamp': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
             'company_url': url,
             'industry': industry,
             'model_used': MODEL_NAME

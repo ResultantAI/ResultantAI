@@ -1,0 +1,100 @@
+{
+  "icp_criteria": {
+    "company_size": {
+      "weight": 20,
+      "ideal_range": [50, 500],
+      "description": "Employee count between 50-500 (mid-market focus)",
+      "notes": "Adjust ideal_range based on your target market. [10-50] for SMB, [500-5000] for enterprise"
+    },
+    "industry": {
+      "weight": 15,
+      "ideal_industries": [
+        "SaaS",
+        "FinTech",
+        "E-commerce",
+        "Technology",
+        "Software",
+        "Financial Services",
+        "Healthcare Tech",
+        "MarTech"
+      ],
+      "description": "Target industries with high digital maturity and tech adoption",
+      "notes": "Customize this list based on your product's vertical fit"
+    },
+    "funding_stage": {
+      "weight": 15,
+      "ideal_stages": [
+        "Series A",
+        "Series B",
+        "Series C",
+        "Growth",
+        "Series D"
+      ],
+      "description": "Funded companies with growth trajectory and budget availability",
+      "notes": "Include 'Bootstrap' or 'Seed' if targeting early-stage companies"
+    },
+    "tech_stack": {
+      "weight": 20,
+      "ideal_technologies": [
+        "React",
+        "Vue.js",
+        "AWS",
+        "Google Cloud",
+        "Stripe",
+        "Salesforce",
+        "HubSpot",
+        "Node.js",
+        "Python",
+        "Shopify",
+        "WordPress",
+        "Next.js",
+        "Vercel"
+      ],
+      "description": "Modern tech stack indicating technical sophistication and compatibility",
+      "notes": "Add technologies that indicate good product fit or integration potential"
+    },
+    "growth_signals": {
+      "weight": 15,
+      "indicators": [
+        "hiring",
+        "expanding",
+        "recent_funding",
+        "press_coverage",
+        "product_launches",
+        "new_markets"
+      ],
+      "description": "Active growth signals indicating buying intent and budget",
+      "notes": "These signals suggest the company is in growth mode and may need your solution"
+    },
+    "market_presence": {
+      "weight": 15,
+      "indicators": [
+        "strong_website",
+        "social_presence",
+        "content_marketing",
+        "seo_optimized",
+        "thought_leadership",
+        "customer_testimonials"
+      ],
+      "description": "Professional market presence and brand maturity",
+      "notes": "Indicates company invests in marketing and has budget for tools/services"
+    }
+  },
+  "scoring_thresholds": {
+    "hot_lead": 80,
+    "warm_lead": 60,
+    "cold_lead": 40,
+    "poor_fit": 0
+  },
+  "configuration_notes": {
+    "total_weight": "All weights must sum to 100",
+    "customization": "Adjust weights based on what matters most for your ICP",
+    "examples": {
+      "enterprise_focus": "Increase company_size weight to 30, reduce tech_stack to 10",
+      "product_led_growth": "Increase tech_stack to 30, reduce funding_stage to 10",
+      "early_stage_focus": "Add 'Seed' and 'Bootstrap' to ideal_stages"
+    }
+  },
+  "version": "1.0",
+  "last_updated": "2025-11-13"
+}
