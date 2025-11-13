@@ -1,0 +1,707 @@
+{
+  "name": "Lead Enrichment & Scoring - Production Ready",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": 1,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "restore": {},
+        "parameters": [
+          {
+            "name": "hook",
+            "type": "hook",
+            "label": "Webhook",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "domain",
+            "type": "text",
+            "label": "Company Domain",
+            "required": true
+          },
+          {
+            "name": "company",
+            "type": "text",
+            "label": "Company Name (optional)",
+            "required": false
+          },
+          {
+            "name": "lead_id",
+            "type": "text",
+            "label": "Lead ID in CRM (optional)",
+            "required": false
+          }
+        ],
+        "interface": [
+          {
+            "name": "domain",
+            "type": "text"
+          },
+          {
+            "name": "company",
+            "type": "text"
+          },
+          {
+            "name": "lead_id",
+            "type": "text"
+          }
+        ]
+      },
+      "notes": "TEST PAYLOAD:\n{\n  \"domain\": \"stripe.com\",\n  \"company\": \"Stripe\",\n  \"lead_id\": \"LEAD-12345\"\n}"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 3,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "variables": [
+                  {
+                    "name": "PYTHON_SCRIPT_PATH",
+                    "value": "/home/user/ResultantAI/lead_enrichment.py"
+                  },
+                  {
+                    "name": "GOOGLE_SHEET_ID",
+                    "value": "TODO_REPLACE_WITH_YOUR_SHEET_ID"
+                  },
+                  {
+                    "name": "SLACK_HOT_WEBHOOK",
+                    "value": "TODO_REPLACE_HOT_LEADS_WEBHOOK"
+                  },
+                  {
+                    "name": "SLACK_WARM_WEBHOOK",
+                    "value": "TODO_REPLACE_WARM_LEADS_WEBHOOK"
+                  },
+                  {
+                    "name": "SLACK_COLD_WEBHOOK",
+                    "value": "TODO_REPLACE_COLD_LEADS_WEBHOOK"
+                  },
+                  {
+                    "name": "SLACK_ERROR_WEBHOOK",
+                    "value": "TODO_REPLACE_ERROR_WEBHOOK"
+                  },
+                  {
+                    "name": "CALENDAR_BOOKING_LINK",
+                    "value": "TODO_REPLACE_WITH_CALENDLY_LINK"
+                  },
+                  {
+                    "name": "MAX_RETRIES",
+                    "value": "3"
+                  },
+                  {
+                    "name": "RETRY_DELAY_SECONDS",
+                    "value": "5"
+                  },
+                  {
+                    "name": "ENRICHMENT_CACHE_DAYS",
+                    "value": "30"
+                  }
+                ],
+                "scope": "roundtrip"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 600,
+                  "y": 0
+                },
+                "restore": {
+                  "expect": {
+                    "variables": {
+                      "items": [
+                        null
+                      ]
+                    },
+                    "scope": {
+                      "label": "One cycle"
+                    }
+                  }
+                }
+              },
+              "notes": "CONFIGURATION MODULE\n\nTODO: Replace these values:\n1. GOOGLE_SHEET_ID: Your enriched leads sheet\n2. SLACK_HOT_WEBHOOK: #hot-leads channel\n3. SLACK_WARM_WEBHOOK: #warm-leads channel\n4. SLACK_COLD_WEBHOOK: #cold-leads channel\n5. SLACK_ERROR_WEBHOOK: #errors channel\n6. CALENDAR_BOOKING_LINK: Calendly/booking URL\n\nEnrichment cache: Skip if enriched in last 30 days"
+            },
+            {
+              "id": 4,
+              "module": "util:SetVariable",
+              "version": 1,
+              "parameters": {},
+              "filter": {
+                "name": "Validate Required Fields",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.domain}}",
+                      "o": "text:notequal",
+                      "b": ""
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "name": "validation_passed",
+                "value": "true",
+                "scope": "roundtrip"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 0
+                }
+              },
+              "notes": "DATA VALIDATION\n\nChecks:\n- Domain is not empty"
+            },
+            {
+              "id": 5,
+              "module": "google-sheets:searchRows",
+              "version": 3,
+              "parameters": {
+                "spreadsheetId": "{{3.GOOGLE_SHEET_ID}}",
+                "sheetName": "Enriched Leads"
+              },
+              "mapper": {
+                "filter": {
+                  "criteria": [
+                    {
+                      "column": "Domain",
+                      "operator": "equals",
+                      "value": "{{1.domain}}"
+                    }
+                  ],
+                  "sort": [
+                    {
+                      "column": "Enrichment Date",
+                      "order": "desc"
+                    }
+                  ],
+                  "limit": 1
+                }
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 0
+                }
+              },
+              "notes": "CHECK IF ALREADY ENRICHED\n\nSearches for existing enrichment record\nfor this domain, sorted by most recent"
+            },
+            {
+              "id": 6,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "mapper": null,
+              "filter": {
+                "name": "Skip if enriched in last 30 days",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{dateDifference(5.enrichmentDate; now; \"days\")}}",
+                      "o": "number:greater",
+                      "b": "{{3.ENRICHMENT_CACHE_DAYS}}"
+                    }
+                  ],
+                  [
+                    {
+                      "a": "{{length(5.rows)}}",
+                      "o": "number:equal",
+                      "b": "0"
+                    }
+                  ]
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 7,
+                      "module": "util:Repeater",
+                      "version": 1,
+                      "parameters": {
+                        "repeats": "{{3.MAX_RETRIES}}"
+                      },
+                      "mapper": {
+                        "stopOnError": false
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 1800,
+                          "y": 0
+                        }
+                      },
+                      "notes": "RETRY LOGIC\n\nAttempts enrichment up to 3 times"
+                    },
+                    {
+                      "id": 8,
+                      "module": "util:Sleep",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "delay": "{{if(7.i > 1; 3.RETRY_DELAY_SECONDS; 0)}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2100,
+                          "y": 0
+                        }
+                      }
+                    },
+                    {
+                      "id": 9,
+                      "module": "util:JSONStringify",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "json": {
+                          "domain": "{{1.domain}}",
+                          "company": "{{1.company}}"
+                        }
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2400,
+                          "y": 0
+                        }
+                      }
+                    },
+                    {
+                      "id": 10,
+                      "module": "util:ExecuteCommand",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "command": "echo '{{9.json}}' | python3 {{3.PYTHON_SCRIPT_PATH}}",
+                        "timeout": 120000
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 0
+                        },
+                        "restore": {},
+                        "errorHandler": [
+                          {
+                            "id": 11,
+                            "module": "builtin:BasicRouter",
+                            "version": 1,
+                            "mapper": null,
+                            "metadata": {
+                              "designer": {
+                                "x": 2700,
+                                "y": 300
+                              }
+                            },
+                            "routes": [
+                              {
+                                "flow": [
+                                  {
+                                    "id": 12,
+                                    "module": "slack:ActionCreateMessage",
+                                    "version": 1,
+                                    "parameters": {
+                                      "token": "{{3.SLACK_ERROR_WEBHOOK}}"
+                                    },
+                                    "mapper": {
+                                      "channel": "#errors",
+                                      "text": "🚨 *Lead Enrichment Failed*\n\n*Domain:* {{1.domain}}\n*Company:* {{1.company}}\n*Error:* {{10.error}}\n*Attempt:* {{7.i}} of {{3.MAX_RETRIES}}\n*Timestamp:* {{formatDate(now; \"YYYY-MM-DD HH:mm:ss\")}}"
+                                    },
+                                    "metadata": {
+                                      "designer": {
+                                        "x": 3000,
+                                        "y": 300
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "id": 13,
+                                    "module": "google-sheets:addRow",
+                                    "version": 3,
+                                    "parameters": {
+                                      "spreadsheetId": "{{3.GOOGLE_SHEET_ID}}",
+                                      "sheetName": "Errors"
+                                    },
+                                    "mapper": {
+                                      "values": [
+                                        "{{formatDate(now; \"YYYY-MM-DD HH:mm:ss\")}}",
+                                        "Lead Enrichment",
+                                        "{{1.domain}}",
+                                        "{{1.company}}",
+                                        "{{10.error}}",
+                                        "Attempt {{7.i}} of {{3.MAX_RETRIES}}"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "designer": {
+                                        "x": 3300,
+                                        "y": 300
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "id": 14,
+                                    "module": "util:Break",
+                                    "version": 1,
+                                    "parameters": {},
+                                    "filter": {
+                                      "name": "Stop if max retries reached",
+                                      "conditions": [
+                                        [
+                                          {
+                                            "a": "{{7.i}}",
+                                            "o": "number:equal",
+                                            "b": "{{3.MAX_RETRIES}}"
+                                          }
+                                        ]
+                                      ]
+                                    },
+                                    "mapper": {},
+                                    "metadata": {
+                                      "designer": {
+                                        "x": 3600,
+                                        "y": 300
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "notes": "EXECUTE PYTHON SCRIPT\n\nRuns lead_enrichment.py with JSON input"
+                    },
+                    {
+                      "id": 15,
+                      "module": "util:JSONParse",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "json": "{{10.output}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 0
+                        }
+                      }
+                    },
+                    {
+                      "id": 16,
+                      "module": "builtin:BasicRouter",
+                      "version": 1,
+                      "mapper": null,
+                      "metadata": {
+                        "designer": {
+                          "x": 3300,
+                          "y": 0
+                        }
+                      },
+                      "routes": [
+                        {
+                          "flow": [
+                            {
+                              "id": 17,
+                              "module": "util:Composer",
+                              "version": 1,
+                              "parameters": {},
+                              "filter": {
+                                "name": "Hot Lead (80+)",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{15.lead_score}}",
+                                      "o": "number:greaterequal",
+                                      "b": "80"
+                                    }
+                                  ]
+                                ]
+                              },
+                              "mapper": {
+                                "text": "🔥 *HOT LEAD ALERT!*\n\n*Company:* {{15.enrichment_data.company_profile.company_name}}\n*Domain:* {{1.domain}}\n*Lead Score:* {{round(15.lead_score)}}/100 🔥🔥🔥\n*Category:* HOT LEAD - PRIORITY OUTREACH\n\n*📊 Quick Stats:*\n• Industry: {{15.enrichment_data.company_profile.industry}}\n• Size: {{15.enrichment_data.company_size.employee_count}} employees ({{15.enrichment_data.company_size.size_category}})\n• Funding: {{15.enrichment_data.funding_and_growth.funding_stage}}\n• Tech Stack: {{join(15.enrichment_data.technology_stack.technologies_detected; \", \")}}\n\n*🎯 Why They're Hot:*\n{{15.recommendation}}\n\n*💡 Talking Points:*\n• Target Customer: {{15.enrichment_data.business_intelligence.target_customer_profile}}\n• Revenue Model: {{15.enrichment_data.business_intelligence.revenue_model}}\n• Tech Sophistication: {{15.enrichment_data.technology_stack.technical_sophistication}}\n\n*📈 Growth Signals:*\n{{if(15.enrichment_data.funding_and_growth.is_hiring; \"✅ Actively hiring\\n\"; \"\")}}• Growth Indicators: {{join(15.enrichment_data.funding_and_growth.growth_indicators; \", \")}}\n\n*🎯 ACTION REQUIRED: Reach out within 24 hours!*\n\n_Lead ID: {{1.lead_id}}_\n_Enriched: {{formatDate(15.enrichment_metadata.timestamp; \"YYYY-MM-DD HH:mm:ss\")}}_"
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3600,
+                                  "y": -300
+                                }
+                              },
+                              "notes": "FORMAT FOR HOT LEADS\n\nRich formatting with urgency indicators"
+                            },
+                            {
+                              "id": 18,
+                              "module": "slack:ActionCreateMessage",
+                              "version": 1,
+                              "parameters": {
+                                "token": "{{3.SLACK_HOT_WEBHOOK}}"
+                              },
+                              "mapper": {
+                                "channel": "#hot-leads",
+                                "text": "{{17.text}}",
+                                "blocks": [
+                                  {
+                                    "type": "section",
+                                    "text": {
+                                      "type": "mrkdwn",
+                                      "text": "{{17.text}}"
+                                    }
+                                  },
+                                  {
+                                    "type": "actions",
+                                    "elements": [
+                                      {
+                                        "type": "button",
+                                        "text": {
+                                          "type": "plain_text",
+                                          "text": "📅 Book Meeting"
+                                        },
+                                        "url": "{{3.CALENDAR_BOOKING_LINK}}",
+                                        "style": "primary"
+                                      },
+                                      {
+                                        "type": "button",
+                                        "text": {
+                                          "type": "plain_text",
+                                          "text": "📄 View Full Report"
+                                        },
+                                        "url": "https://docs.google.com/spreadsheets/d/{{3.GOOGLE_SHEET_ID}}"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3900,
+                                  "y": -300
+                                }
+                              },
+                              "notes": "Send to #hot-leads with calendar booking button"
+                            }
+                          ]
+                        },
+                        {
+                          "flow": [
+                            {
+                              "id": 19,
+                              "module": "util:Composer",
+                              "version": 1,
+                              "parameters": {},
+                              "filter": {
+                                "name": "Warm Lead (60-79)",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{15.lead_score}}",
+                                      "o": "number:greaterequal",
+                                      "b": "60"
+                                    },
+                                    {
+                                      "a": "{{15.lead_score}}",
+                                      "o": "number:less",
+                                      "b": "80"
+                                    }
+                                  ]
+                                ]
+                              },
+                              "mapper": {
+                                "text": "⭐ *Warm Lead Identified*\n\n*Company:* {{15.enrichment_data.company_profile.company_name}}\n*Domain:* {{1.domain}}\n*Lead Score:* {{round(15.lead_score)}}/100 ⭐\n*Category:* WARM LEAD - Qualified Fit\n\n*📊 Company Profile:*\n• Industry: {{15.enrichment_data.company_profile.industry}}\n• Size: {{15.enrichment_data.company_size.employee_count}} employees\n• Funding: {{15.enrichment_data.funding_and_growth.funding_stage}}\n\n*💡 Recommendation:*\n{{15.recommendation}}\n\n*🎯 Next Steps:*\n• Add to nurture sequence\n• Monitor for growth signals\n• Engage with content marketing\n\n_Lead ID: {{1.lead_id}}_"
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3600,
+                                  "y": 0
+                                }
+                              },
+                              "notes": "FORMAT FOR WARM LEADS"
+                            },
+                            {
+                              "id": 20,
+                              "module": "slack:ActionCreateMessage",
+                              "version": 1,
+                              "parameters": {
+                                "token": "{{3.SLACK_WARM_WEBHOOK}}"
+                              },
+                              "mapper": {
+                                "channel": "#warm-leads",
+                                "text": "{{19.text}}",
+                                "blocks": [
+                                  {
+                                    "type": "section",
+                                    "text": {
+                                      "type": "mrkdwn",
+                                      "text": "{{19.text}}"
+                                    }
+                                  },
+                                  {
+                                    "type": "actions",
+                                    "elements": [
+                                      {
+                                        "type": "button",
+                                        "text": {
+                                          "type": "plain_text",
+                                          "text": "📄 View Full Report"
+                                        },
+                                        "url": "https://docs.google.com/spreadsheets/d/{{3.GOOGLE_SHEET_ID}}"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3900,
+                                  "y": 0
+                                }
+                              },
+                              "notes": "Send to #warm-leads"
+                            }
+                          ]
+                        },
+                        {
+                          "flow": [
+                            {
+                              "id": 21,
+                              "module": "util:Composer",
+                              "version": 1,
+                              "parameters": {},
+                              "filter": {
+                                "name": "Cold Lead (40-59)",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{15.lead_score}}",
+                                      "o": "number:greaterequal",
+                                      "b": "40"
+                                    },
+                                    {
+                                      "a": "{{15.lead_score}}",
+                                      "o": "number:less",
+                                      "b": "60"
+                                    }
+                                  ]
+                                ]
+                              },
+                              "mapper": {
+                                "text": "❄️ *Cold Lead*\n\n*Company:* {{15.enrichment_data.company_profile.company_name}}\n*Domain:* {{1.domain}}\n*Lead Score:* {{round(15.lead_score)}}/100\n*Category:* COLD LEAD - Long-term Nurture\n\n*📊 Profile:*\n• Industry: {{15.enrichment_data.company_profile.industry}}\n• Size: {{15.enrichment_data.company_size.employee_count}} employees\n\n*🎯 Action:* Add to long-term drip campaign\n\n_Lead ID: {{1.lead_id}}_"
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3600,
+                                  "y": 300
+                                }
+                              },
+                              "notes": "FORMAT FOR COLD LEADS"
+                            },
+                            {
+                              "id": 22,
+                              "module": "slack:ActionCreateMessage",
+                              "version": 1,
+                              "parameters": {
+                                "token": "{{3.SLACK_COLD_WEBHOOK}}"
+                              },
+                              "mapper": {
+                                "channel": "#cold-leads",
+                                "text": "{{21.text}}"
+                              },
+                              "metadata": {
+                                "designer": {
+                                  "x": 3900,
+                                  "y": 300
+                                }
+                              },
+                              "notes": "Send to #cold-leads (minimal formatting)"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": 23,
+                      "module": "google-sheets:addRow",
+                      "version": 3,
+                      "parameters": {
+                        "spreadsheetId": "{{3.GOOGLE_SHEET_ID}}",
+                        "sheetName": "Enriched Leads"
+                      },
+                      "mapper": {
+                        "values": [
+                          "{{formatDate(15.enrichment_metadata.timestamp; \"YYYY-MM-DD HH:mm:ss\")}}",
+                          "{{1.domain}}",
+                          "{{15.enrichment_data.company_profile.company_name}}",
+                          "{{15.enrichment_data.company_profile.industry}}",
+                          "{{round(15.lead_score)}}",
+                          "{{15.lead_category}}",
+                          "{{15.enrichment_data.company_size.employee_count}}",
+                          "{{15.enrichment_data.company_size.size_category}}",
+                          "{{15.enrichment_data.funding_and_growth.funding_stage}}",
+                          "{{join(15.enrichment_data.technology_stack.technologies_detected; \", \")}}",
+                          "{{15.enrichment_data.funding_and_growth.is_hiring}}",
+                          "{{15.enrichment_data.market_presence.brand_maturity}}",
+                          "{{1.lead_id}}"
+                        ]
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 4200,
+                          "y": 0
+                        }
+                      },
+                      "notes": "Save enriched lead data to Google Sheet"
+                    }
+                  ]
+                }
+              ],
+              "notes": "FILTER: Skip if enriched recently\n\nOnly proceeds if:\n- No existing record found, OR\n- Last enrichment was >30 days ago\n\nThis prevents duplicate enrichment costs"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": false,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "us1.make.com"
+  },
+  "notes": "# LEAD ENRICHMENT & SCORING - PRODUCTION BLUEPRINT\n\n## FEATURES:\n✅ Webhook trigger with validation\n✅ Smart caching (skip if enriched in last 30 days)\n✅ Error handling with Slack notifications\n✅ Retry logic (3 attempts, 5s delays)\n✅ Conditional routing by lead score:\n   - Hot leads (80+) → #hot-leads with calendar booking button\n   - Warm leads (60-79) → #warm-leads\n   - Cold leads (40-59) → #cold-leads\n✅ Rich Slack formatting per category\n✅ Google Sheets logging\n✅ Configurable via Set Variables module\n\n## SETUP INSTRUCTIONS:\n\n1. **Import this blueprint** to Make.com\n\n2. **Configure variables** in Module #3 (Set Variables):\n   - GOOGLE_SHEET_ID: Your Google Sheet ID\n   - SLACK_HOT_WEBHOOK: #hot-leads channel webhook\n   - SLACK_WARM_WEBHOOK: #warm-leads channel webhook\n   - SLACK_COLD_WEBHOOK: #cold-leads channel webhook\n   - SLACK_ERROR_WEBHOOK: #errors channel webhook\n   - CALENDAR_BOOKING_LINK: Your Calendly/booking URL\n   - ENRICHMENT_CACHE_DAYS: Days before re-enriching (default: 30)\n\n3. **Set up Google Sheet** with these tabs:\n   - \"Enriched Leads\" (main data with Enrichment Date column)\n   - \"Errors\" (error log)\n\n4. **Configure Slack webhooks**:\n   - Create incoming webhook for #hot-leads\n   - Create incoming webhook for #warm-leads\n   - Create incoming webhook for #cold-leads\n   - Create incoming webhook for #errors\n\n5. **Test with sample payload**:\n   ```json\n   {\n     \"domain\": \"stripe.com\",\n     \"company\": \"Stripe\",\n     \"lead_id\": \"LEAD-12345\"\n   }\n   ```\n\n## GOOGLE SHEET STRUCTURE:\n\n### Enriched Leads Sheet:\nEnrichment Date | Domain | Company Name | Industry | Lead Score | Category | Employees | Size Category | Funding Stage | Tech Stack | Is Hiring | Brand Maturity | Lead ID\n\n### Errors Sheet:\nTimestamp | System | Domain | Company | Error Message | Retry Info\n\n## LEAD ROUTING LOGIC:\n\n**Hot Leads (80-100):**\n- Sent to: #hot-leads\n- Format: Detailed with urgency\n- Action: Calendar booking button + full report link\n- Priority: Immediate outreach\n\n**Warm Leads (60-79):**\n- Sent to: #warm-leads\n- Format: Standard profile\n- Action: Add to nurture sequence\n- Priority: Qualified, monitor\n\n**Cold Leads (40-59):**\n- Sent to: #cold-leads\n- Format: Basic info\n- Action: Long-term drip campaign\n- Priority: Low priority\n\n**Poor Fit (<40):**\n- Not sent to Slack (reduces noise)\n- Logged to Google Sheet only\n- Priority: Archive/exclude\n\n## ENRICHMENT CACHING:\n\nThe blueprint checks if a domain has been enriched recently:\n- If enriched in last 30 days → Skip (saves API costs)\n- If older or not found → Proceed with enrichment\n\nAdjust ENRICHMENT_CACHE_DAYS variable to change this behavior.\n\n## WEBHOOK URL:\nAfter import, get webhook URL from Module #1\n\n## DEPENDENCIES:\n- Python 3.8+ with lead_enrichment.py\n- Google Sheets API connection\n- Slack workspace with webhook URLs\n- Calendar booking system (Calendly, etc.)\n\n## SUPPORT:\nCheck module notes for detailed configuration help"
+}
