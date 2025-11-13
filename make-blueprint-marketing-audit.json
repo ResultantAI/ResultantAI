@@ -1,0 +1,644 @@
+{
+  "name": "Marketing Audit System - Production Ready",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": 1,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "restore": {},
+        "parameters": [
+          {
+            "name": "hook",
+            "type": "hook",
+            "label": "Webhook",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "url",
+            "type": "text",
+            "label": "Company URL",
+            "required": true
+          },
+          {
+            "name": "industry",
+            "type": "text",
+            "label": "Industry",
+            "required": true
+          },
+          {
+            "name": "company_id",
+            "type": "text",
+            "label": "HubSpot Company ID (optional)",
+            "required": false
+          },
+          {
+            "name": "requester_email",
+            "type": "email",
+            "label": "Requester Email",
+            "required": false
+          }
+        ],
+        "interface": [
+          {
+            "name": "url",
+            "type": "text"
+          },
+          {
+            "name": "industry",
+            "type": "text"
+          },
+          {
+            "name": "company_id",
+            "type": "text"
+          },
+          {
+            "name": "requester_email",
+            "type": "email"
+          }
+        ]
+      },
+      "notes": "TEST PAYLOAD:\n{\n  \"url\": \"https://stripe.com\",\n  \"industry\": \"FinTech\",\n  \"company_id\": \"12345\",\n  \"requester_email\": \"analyst@company.com\"\n}"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 3,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "variables": [
+                  {
+                    "name": "PYTHON_SCRIPT_PATH",
+                    "value": "/home/user/ResultantAI/marketing_audit.py"
+                  },
+                  {
+                    "name": "GOOGLE_SHEET_ID",
+                    "value": "TODO_REPLACE_WITH_YOUR_SHEET_ID"
+                  },
+                  {
+                    "name": "SLACK_WEBHOOK_URL",
+                    "value": "TODO_REPLACE_WITH_YOUR_SLACK_WEBHOOK"
+                  },
+                  {
+                    "name": "SLACK_ERROR_WEBHOOK",
+                    "value": "TODO_REPLACE_WITH_ERROR_CHANNEL_WEBHOOK"
+                  },
+                  {
+                    "name": "HUBSPOT_API_KEY",
+                    "value": "TODO_REPLACE_WITH_HUBSPOT_API_KEY"
+                  },
+                  {
+                    "name": "MAX_RETRIES",
+                    "value": "3"
+                  },
+                  {
+                    "name": "RETRY_DELAY_SECONDS",
+                    "value": "5"
+                  }
+                ],
+                "scope": "roundtrip"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 600,
+                  "y": 0
+                },
+                "restore": {
+                  "expect": {
+                    "variables": {
+                      "items": [
+                        null
+                      ]
+                    },
+                    "scope": {
+                      "label": "One cycle"
+                    }
+                  }
+                }
+              },
+              "notes": "CONFIGURATION MODULE\n\nTODO: Replace these values:\n1. GOOGLE_SHEET_ID: Your audit results sheet\n2. SLACK_WEBHOOK_URL: #marketing-audits channel\n3. SLACK_ERROR_WEBHOOK: #errors channel\n4. HUBSPOT_API_KEY: Your HubSpot API key\n\nRetry logic: 3 attempts with 5-second delays"
+            },
+            {
+              "id": 4,
+              "module": "util:SetVariable",
+              "version": 1,
+              "parameters": {},
+              "filter": {
+                "name": "Validate Required Fields",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.url}}",
+                      "o": "text:notequal",
+                      "b": ""
+                    },
+                    {
+                      "a": "{{1.industry}}",
+                      "o": "text:notequal",
+                      "b": ""
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "name": "validation_passed",
+                "value": "true",
+                "scope": "roundtrip"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 0
+                },
+                "restore": {
+                  "expect": {
+                    "scope": {
+                      "label": "One cycle"
+                    }
+                  }
+                }
+              },
+              "notes": "DATA VALIDATION\n\nChecks:\n- URL is not empty\n- Industry is not empty\n\nIf validation fails, flow stops here"
+            },
+            {
+              "id": 5,
+              "module": "util:SetVariable",
+              "version": 1,
+              "parameters": {},
+              "filter": {
+                "name": "Validate URL Format",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.url}}",
+                      "o": "text:match",
+                      "b": "^https?://.+"
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "name": "url_valid",
+                "value": "true",
+                "scope": "roundtrip"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 0
+                }
+              },
+              "notes": "URL FORMAT VALIDATION\n\nEnsures URL starts with http:// or https://"
+            },
+            {
+              "id": 6,
+              "module": "util:Repeater",
+              "version": 1,
+              "parameters": {
+                "repeats": "{{3.MAX_RETRIES}}"
+              },
+              "mapper": {
+                "stopOnError": false
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0
+                },
+                "restore": {
+                  "parameters": {
+                    "repeats": {
+                      "label": "Variable: MAX_RETRIES"
+                    }
+                  }
+                }
+              },
+              "notes": "RETRY LOGIC\n\nAttempts script execution up to 3 times\nwith 5-second delays between attempts"
+            },
+            {
+              "id": 7,
+              "module": "util:Sleep",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "delay": "{{if(6.i > 1; 3.RETRY_DELAY_SECONDS; 0)}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 0
+                }
+              },
+              "notes": "Delay between retry attempts (skip on first attempt)"
+            },
+            {
+              "id": 8,
+              "module": "util:JSONStringify",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": {
+                  "url": "{{1.url}}",
+                  "industry": "{{1.industry}}"
+                }
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 0
+                }
+              },
+              "notes": "Prepare JSON input for Python script"
+            },
+            {
+              "id": 9,
+              "module": "util:ExecuteCommand",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "command": "echo '{{8.json}}' | python3 {{3.PYTHON_SCRIPT_PATH}}",
+                "timeout": 120000
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 0
+                },
+                "restore": {},
+                "errorHandler": [
+                  {
+                    "id": 10,
+                    "module": "builtin:BasicRouter",
+                    "version": 1,
+                    "mapper": null,
+                    "metadata": {
+                      "designer": {
+                        "x": 2400,
+                        "y": 300
+                      }
+                    },
+                    "routes": [
+                      {
+                        "flow": [
+                          {
+                            "id": 11,
+                            "module": "slack:ActionCreateMessage",
+                            "version": 1,
+                            "parameters": {
+                              "token": "{{3.SLACK_ERROR_WEBHOOK}}"
+                            },
+                            "mapper": {
+                              "channel": "#errors",
+                              "text": "🚨 *Marketing Audit Failed*\n\n*Company:* {{1.url}}\n*Industry:* {{1.industry}}\n*Error:* {{9.error}}\n*Attempt:* {{6.i}} of {{3.MAX_RETRIES}}\n*Timestamp:* {{formatDate(now; \"YYYY-MM-DD HH:mm:ss\")}}"
+                            },
+                            "metadata": {
+                              "designer": {
+                                "x": 2700,
+                                "y": 300
+                              }
+                            }
+                          },
+                          {
+                            "id": 12,
+                            "module": "google-sheets:addRow",
+                            "version": 3,
+                            "parameters": {
+                              "spreadsheetId": "{{3.GOOGLE_SHEET_ID}}",
+                              "sheetName": "Errors"
+                            },
+                            "mapper": {
+                              "values": [
+                                "{{formatDate(now; \"YYYY-MM-DD HH:mm:ss\")}}",
+                                "Marketing Audit",
+                                "{{1.url}}",
+                                "{{1.industry}}",
+                                "{{9.error}}",
+                                "Attempt {{6.i}} of {{3.MAX_RETRIES}}"
+                              ]
+                            },
+                            "metadata": {
+                              "designer": {
+                                "x": 3000,
+                                "y": 300
+                              }
+                            },
+                            "notes": "Log error to 'Errors' sheet\n\nColumns:\n- Timestamp\n- System\n- Company URL\n- Industry\n- Error Message\n- Retry Info"
+                          },
+                          {
+                            "id": 13,
+                            "module": "util:Break",
+                            "version": 1,
+                            "parameters": {},
+                            "filter": {
+                              "name": "Stop if max retries reached",
+                              "conditions": [
+                                [
+                                  {
+                                    "a": "{{6.i}}",
+                                    "o": "number:equal",
+                                    "b": "{{3.MAX_RETRIES}}"
+                                  }
+                                ]
+                              ]
+                            },
+                            "mapper": {},
+                            "metadata": {
+                              "designer": {
+                                "x": 3300,
+                                "y": 300
+                              }
+                            },
+                            "notes": "Stop retrying if we've exhausted all attempts"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "notes": "EXECUTE PYTHON SCRIPT\n\nRuns marketing_audit.py with JSON input\nTimeout: 120 seconds\n\nError handler triggers if script fails"
+            },
+            {
+              "id": 14,
+              "module": "util:JSONParse",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": "{{9.output}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2700,
+                  "y": 0
+                }
+              },
+              "notes": "Parse Python script JSON output"
+            },
+            {
+              "id": 15,
+              "module": "util:Composer",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "text": "🎯 *Marketing Audit Complete!*\n\n*Company:* {{1.url}}\n*Industry:* {{1.industry}}\n*Overall Score:* {{14.findings.overall_assessment.overall_score}}/10 {{if(14.findings.overall_assessment.overall_score >= 8; \"🟢\"; if(14.findings.overall_assessment.overall_score >= 6; \"🟡\"; \"🔴\"))}}\n\n*📊 Scores by Category:*\n• SEO: {{14.findings.seo_analysis.score}}/10\n• Content: {{14.findings.content_strategy.score}}/10\n• Social Media: {{14.findings.social_media_presence.score}}/10\n• Paid Ads Potential: {{14.findings.paid_advertising.google_ads_potential.score}}/10\n\n*🎯 Top 3 Quick Wins:*\n{{join(map(14.findings.quick_wins; \"• \" + item.title + \" (\" + item.impact + \" impact, \" + item.effort + \" effort)\"); newline)}}\n\n*💪 Key Strengths:*\n{{join(map(14.findings.overall_assessment.strengths; \"• \" + item); newline)}}\n\n*⚠️ Key Weaknesses:*\n{{join(map(14.findings.overall_assessment.weaknesses; \"• \" + item); newline)}}\n\n*📈 Priority Actions:*\n{{join(map(14.findings.overall_assessment.priority_actions; \"1️⃣ \" + item); newline)}}\n\n_Audit completed at {{formatDate(14.audit_metadata.timestamp; \"YYYY-MM-DD HH:mm:ss\")}}_"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3000,
+                  "y": 0
+                }
+              },
+              "notes": "FORMAT FOR SLACK\n\nCreates rich, visual Slack message with:\n- Emojis for visual appeal\n- Color-coded scores\n- Structured sections\n- Easy-to-scan format"
+            },
+            {
+              "id": 16,
+              "module": "slack:ActionCreateMessage",
+              "version": 1,
+              "parameters": {
+                "token": "{{3.SLACK_WEBHOOK_URL}}"
+              },
+              "mapper": {
+                "channel": "#marketing-audits",
+                "text": "{{15.text}}",
+                "blocks": [
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "{{15.text}}"
+                    }
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "📄 View Full Report"
+                        },
+                        "url": "https://docs.google.com/spreadsheets/d/{{3.GOOGLE_SHEET_ID}}"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3300,
+                  "y": 0
+                }
+              },
+              "notes": "Send formatted audit to Slack with button to view full report"
+            },
+            {
+              "id": 17,
+              "module": "google-sheets:addRow",
+              "version": 3,
+              "parameters": {
+                "spreadsheetId": "{{3.GOOGLE_SHEET_ID}}",
+                "sheetName": "Marketing Audits"
+              },
+              "mapper": {
+                "values": [
+                  "{{formatDate(14.audit_metadata.timestamp; \"YYYY-MM-DD HH:mm:ss\")}}",
+                  "{{1.url}}",
+                  "{{1.industry}}",
+                  "{{14.findings.overall_assessment.overall_score}}",
+                  "{{14.findings.seo_analysis.score}}",
+                  "{{14.findings.content_strategy.score}}",
+                  "{{14.findings.social_media_presence.score}}",
+                  "{{14.findings.paid_advertising.google_ads_potential.score}}",
+                  "{{join(14.findings.quick_wins[1].title)}}",
+                  "{{join(14.findings.overall_assessment.strengths; \", \")}}",
+                  "{{join(14.findings.overall_assessment.weaknesses; \", \")}}",
+                  "{{1.company_id}}",
+                  "{{1.requester_email}}"
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3600,
+                  "y": 0
+                }
+              },
+              "notes": "Save to Google Sheet: Marketing Audits\n\nColumns:\n- Timestamp\n- URL\n- Industry\n- Overall Score\n- SEO Score\n- Content Score\n- Social Score\n- Paid Ads Score\n- Top Quick Win\n- Strengths\n- Weaknesses\n- HubSpot ID\n- Requester Email"
+            },
+            {
+              "id": 18,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "mapper": null,
+              "filter": {
+                "name": "Only if HubSpot Company ID exists",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.company_id}}",
+                      "o": "text:notequal",
+                      "b": ""
+                    }
+                  ]
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3900,
+                  "y": 0
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 19,
+                      "module": "hubspot:updateCompany",
+                      "version": 1,
+                      "parameters": {
+                        "apiKey": "{{3.HUBSPOT_API_KEY}}"
+                      },
+                      "mapper": {
+                        "companyId": "{{1.company_id}}",
+                        "properties": [
+                          {
+                            "name": "marketing_audit_score",
+                            "value": "{{14.findings.overall_assessment.overall_score}}"
+                          },
+                          {
+                            "name": "marketing_audit_date",
+                            "value": "{{formatDate(14.audit_metadata.timestamp; \"YYYY-MM-DD\")}}"
+                          },
+                          {
+                            "name": "marketing_audit_top_weakness",
+                            "value": "{{14.findings.overall_assessment.weaknesses[1]}}"
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 4200,
+                          "y": 0
+                        }
+                      },
+                      "notes": "CONDITIONAL: Update HubSpot company\n\nOnly runs if company_id is provided\n\nUpdates:\n- Marketing audit score\n- Audit date\n- Top weakness for sales context"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": 20,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "mapper": null,
+              "filter": {
+                "name": "Only if requester email provided",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.requester_email}}",
+                      "o": "text:notequal",
+                      "b": ""
+                    }
+                  ]
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 4500,
+                  "y": 0
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 21,
+                      "module": "email:SendEmail",
+                      "version": 1,
+                      "parameters": {},
+                      "mapper": {
+                        "to": "{{1.requester_email}}",
+                        "subject": "Marketing Audit Complete: {{1.url}}",
+                        "body": "Hi,\n\nYour marketing audit for {{1.url}} is complete!\n\n*Overall Score:* {{14.findings.overall_assessment.overall_score}}/10\n\n*Top Quick Win:*\n{{14.findings.quick_wins[1].title}}\n{{14.findings.quick_wins[1].description}}\n\nView the full report here:\nhttps://docs.google.com/spreadsheets/d/{{3.GOOGLE_SHEET_ID}}\n\n(PDF report generation coming soon)\n\nBest regards,\nMarketing Audit System"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 4800,
+                          "y": 0
+                        }
+                      },
+                      "notes": "EMAIL: Send audit summary to requester\n\n(PDF attachment will be added in next phase)"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": 22,
+              "module": "google-sheets:updateCell",
+              "version": 3,
+              "parameters": {
+                "spreadsheetId": "{{3.GOOGLE_SHEET_ID}}",
+                "sheetName": "Stats"
+              },
+              "mapper": {
+                "cell": "A1",
+                "value": "{{add(get(\"total_audits\"; 0); 1)}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 5100,
+                  "y": 0
+                }
+              },
+              "notes": "AGGREGATE DATA\n\nIncrements total audit counter in Stats sheet\nCell A1 = Total audits completed"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": false,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "us1.make.com"
+  },
+  "notes": "# MARKETING AUDIT SYSTEM - PRODUCTION BLUEPRINT\n\n## FEATURES:\n✅ Webhook trigger with validation\n✅ Error handling with Slack notifications\n✅ Retry logic (3 attempts, 5s delays)\n✅ URL format validation\n✅ Rich Slack formatting with emojis\n✅ Google Sheets logging\n✅ Conditional HubSpot update\n✅ Email notification to requester\n✅ Aggregate data tracking\n✅ Configurable via Set Variables module\n\n## SETUP INSTRUCTIONS:\n\n1. **Import this blueprint** to Make.com\n\n2. **Configure variables** in Module #3 (Set Variables):\n   - GOOGLE_SHEET_ID: Your Google Sheet ID\n   - SLACK_WEBHOOK_URL: #marketing-audits channel webhook\n   - SLACK_ERROR_WEBHOOK: #errors channel webhook\n   - HUBSPOT_API_KEY: Your HubSpot API key\n\n3. **Set up Google Sheet** with these tabs:\n   - \"Marketing Audits\" (main results)\n   - \"Errors\" (error log)\n   - \"Stats\" (aggregate data)\n\n4. **Configure Slack webhooks**:\n   - Create incoming webhook for #marketing-audits\n   - Create incoming webhook for #errors\n\n5. **Test with sample payload**:\n   ```json\n   {\n     \"url\": \"https://stripe.com\",\n     \"industry\": \"FinTech\",\n     \"company_id\": \"12345\",\n     \"requester_email\": \"analyst@company.com\"\n   }\n   ```\n\n## GOOGLE SHEET STRUCTURE:\n\n### Marketing Audits Sheet:\nTimestamp | URL | Industry | Overall Score | SEO Score | Content Score | Social Score | Paid Ads Score | Top Quick Win | Strengths | Weaknesses | HubSpot ID | Requester Email\n\n### Errors Sheet:\nTimestamp | System | Company URL | Industry | Error Message | Retry Info\n\n### Stats Sheet:\nCell A1: Total audits completed (auto-incremented)\n\n## WEBHOOK URL:\nAfter import, get webhook URL from Module #1\n\n## DEPENDENCIES:\n- Python 3.8+ with marketing_audit.py\n- Google Sheets API connection\n- Slack workspace with webhook URLs\n- HubSpot account (optional)\n- Email service connection\n\n## SUPPORT:\nCheck module notes for detailed configuration help"
+}

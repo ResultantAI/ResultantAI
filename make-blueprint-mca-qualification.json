@@ -1,0 +1,828 @@
+{
+  "name": "MCA Qualification System - Production Ready",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": 1,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "restore": {},
+        "parameters": [
+          {
+            "name": "hook",
+            "type": "hook",
+            "label": "Webhook",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "company_name",
+            "type": "text",
+            "label": "Company Name",
+            "required": true
+          },
+          {
+            "name": "annual_revenue",
+            "type": "number",
+            "label": "Annual Revenue (USD)",
+            "required": true
+          },
+          {
+            "name": "credit_score",
+            "type": "number",
+            "label": "Credit Score (300-850)",
+            "required": true
+          },
+          {
+            "name": "business_age_months",
+            "type": "number",
+            "label": "Business Age (months)",
+            "required": true
+          },
+          {
+            "name": "industry",
+            "type": "text",
+            "label": "Industry",
+            "required": false
+          },
+          {
+            "name": "monthly_revenue",
+            "type": "number",
+            "label": "Monthly Revenue (optional)",
+            "required": false
+          },
+          {
+            "name": "existing_debt",
+            "type": "number",
+            "label": "Existing Debt (optional)",
+            "required": false
+          },
+          {
+            "name": "applicant_email",
+            "type": "email",
+            "label": "Applicant Email",
+            "required": false
+          },
+          {
+            "name": "application_id",
+            "type": "text",
+            "label": "Application ID",
+            "required": false
+          }
+        ],
+        "interface": [
+          {
+            "name": "company_name",
+            "type": "text"
+          },
+          {
+            "name": "annual_revenue",
+            "type": "number"
+          },
+          {
+            "name": "credit_score",
+            "type": "number"
+          },
+          {
+            "name": "business_age_months",
+            "type": "number"
+          },
+          {
+            "name": "industry",
+            "type": "text"
+          },
+          {
+            "name": "monthly_revenue",
+            "type": "number"
+          },
+          {
+            "name": "existing_debt",
+            "type": "number"
+          },
+          {
+            "name": "applicant_email",
+            "type": "email"
+          },
+          {
+            "name": "application_id",
+            "type": "text"
+          }
+        ]
+      },
+      "notes": "TEST PAYLOAD - APPROVED:\n{\n  \"company_name\": \"Tech Startup Inc\",\n  \"annual_revenue\": 500000,\n  \"credit_score\": 680,\n  \"business_age_months\": 24,\n  \"industry\": \"Technology\",\n  \"existing_debt\": 50000,\n  \"applicant_email\": \"owner@techstartup.com\",\n  \"application_id\": \"MCA-2025-001\"\n}\n\nTEST PAYLOAD - REJECTED:\n{\n  \"company_name\": \"New Biz\",\n  \"annual_revenue\": 50000,\n  \"credit_score\": 450,\n  \"business_age_months\": 3,\n  \"industry\": \"Retail\",\n  \"applicant_email\": \"owner@newbiz.com\",\n  \"application_id\": \"MCA-2025-002\"\n}"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 3,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "variables": [
+                  {
+                    "name": "PYTHON_SCRIPT_PATH",
+                    "value": "/home/user/ResultantAI/mca_qualification.py"
+                  },
+                  {
+                    "name": "GOOGLE_SHEET_ID",
+                    "value": "TODO_REPLACE_WITH_YOUR_SHEET_ID"
+                  },
+                  {
+                    "name": "SLACK_APPROVED_WEBHOOK",
+                    "value": "TODO_REPLACE_UNDERWRITER_QUEUE_WEBHOOK"
+                  },
+                  {
+                    "name": "SLACK_REJECTED_WEBHOOK",
+                    "value": "TODO_REPLACE_REJECTIONS_LOG_WEBHOOK"
+                  },
+                  {
+                    "name": "SLACK_ERROR_WEBHOOK",
+                    "value": "TODO_REPLACE_ERROR_WEBHOOK"
+                  },
+                  {
+                    "name": "EMAIL_FROM",
+                    "value": "TODO_REPLACE_WITH_FROM_EMAIL"
+                  },
+                  {
+                    "name": "MAX_RETRIES",
+                    "value": "3"
+                  },
+                  {
+                    "name": "RETRY_DELAY_SECONDS",
+                    "value": "5"
+                  },
+                  {
+                    "name": "MIN_REVENUE",
+                    "value": "100000"
+                  },
+                  {
+                    "name": "MIN_CREDIT_SCORE",
+                    "value": "500"
+                  },
+                  {
+                    "name": "MIN_BUSINESS_AGE",
+                    "value": "6"
+                  }
+                ],
+                "scope": "roundtrip"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 600,
+                  "y": 0
+                },
+                "restore": {
+                  "expect": {
+                    "variables": {
+                      "items": [
+                        null
+                      ]
+                    },
+                    "scope": {
+                      "label": "One cycle"
+                    }
+                  }
+                }
+              },
+              "notes": "CONFIGURATION MODULE\n\nTODO: Replace these values:\n1. GOOGLE_SHEET_ID: Your MCA applications sheet\n2. SLACK_APPROVED_WEBHOOK: #underwriter-queue channel\n3. SLACK_REJECTED_WEBHOOK: #rejections-log channel\n4. SLACK_ERROR_WEBHOOK: #errors channel\n5. EMAIL_FROM: Your notification email\n\nMinimum Qualification Thresholds:\n- Revenue: $100,000/year\n- Credit Score: 500\n- Business Age: 6 months"
+            },
+            {
+              "id": 4,
+              "module": "util:SetVariable",
+              "version": 1,
+              "parameters": {},
+              "filter": {
+                "name": "Validate Required Fields",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.company_name}}",
+                      "o": "text:notequal",
+                      "b": ""
+                    },
+                    {
+                      "a": "{{1.annual_revenue}}",
+                      "o": "exist",
+                      "b": ""
+                    },
+                    {
+                      "a": "{{1.credit_score}}",
+                      "o": "exist",
+                      "b": ""
+                    },
+                    {
+                      "a": "{{1.business_age_months}}",
+                      "o": "exist",
+                      "b": ""
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "name": "validation_passed",
+                "value": "true",
+                "scope": "roundtrip"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 0
+                }
+              },
+              "notes": "DATA VALIDATION\n\nChecks required fields:\n- Company name\n- Annual revenue\n- Credit score\n- Business age"
+            },
+            {
+              "id": 5,
+              "module": "util:SetVariable",
+              "version": 1,
+              "parameters": {},
+              "filter": {
+                "name": "Validate Revenue Range",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.annual_revenue}}",
+                      "o": "number:greater",
+                      "b": "0"
+                    },
+                    {
+                      "a": "{{1.annual_revenue}}",
+                      "o": "number:lessequal",
+                      "b": "100000000"
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "name": "revenue_valid",
+                "value": "true",
+                "scope": "roundtrip"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 0
+                }
+              },
+              "notes": "VALIDATE REVENUE\n\nMust be:\n- Greater than $0\n- Less than $100M (sanity check)"
+            },
+            {
+              "id": 6,
+              "module": "util:SetVariable",
+              "version": 1,
+              "parameters": {},
+              "filter": {
+                "name": "Validate Credit Score Range",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.credit_score}}",
+                      "o": "number:greaterequal",
+                      "b": "300"
+                    },
+                    {
+                      "a": "{{1.credit_score}}",
+                      "o": "number:lessequal",
+                      "b": "850"
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "name": "credit_valid",
+                "value": "true",
+                "scope": "roundtrip"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0
+                }
+              },
+              "notes": "VALIDATE CREDIT SCORE\n\nMust be between 300-850"
+            },
+            {
+              "id": 7,
+              "module": "util:Repeater",
+              "version": 1,
+              "parameters": {
+                "repeats": "{{3.MAX_RETRIES}}"
+              },
+              "mapper": {
+                "stopOnError": false
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 0
+                }
+              },
+              "notes": "RETRY LOGIC\n\nAttempts qualification up to 3 times"
+            },
+            {
+              "id": 8,
+              "module": "util:Sleep",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "delay": "{{if(7.i > 1; 3.RETRY_DELAY_SECONDS; 0)}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 0
+                }
+              }
+            },
+            {
+              "id": 9,
+              "module": "util:JSONStringify",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": {
+                  "company_name": "{{1.company_name}}",
+                  "annual_revenue": "{{1.annual_revenue}}",
+                  "credit_score": "{{1.credit_score}}",
+                  "business_age_months": "{{1.business_age_months}}",
+                  "industry": "{{if(1.industry; 1.industry; \"General Business\")}}",
+                  "monthly_revenue": "{{1.monthly_revenue}}",
+                  "existing_debt": "{{1.existing_debt}}"
+                }
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 0
+                }
+              }
+            },
+            {
+              "id": 10,
+              "module": "util:ExecuteCommand",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "command": "echo '{{9.json}}' | python3 {{3.PYTHON_SCRIPT_PATH}}",
+                "timeout": 120000
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2700,
+                  "y": 0
+                },
+                "restore": {},
+                "errorHandler": [
+                  {
+                    "id": 11,
+                    "module": "builtin:BasicRouter",
+                    "version": 1,
+                    "mapper": null,
+                    "metadata": {
+                      "designer": {
+                        "x": 2700,
+                        "y": 300
+                      }
+                    },
+                    "routes": [
+                      {
+                        "flow": [
+                          {
+                            "id": 12,
+                            "module": "slack:ActionCreateMessage",
+                            "version": 1,
+                            "parameters": {
+                              "token": "{{3.SLACK_ERROR_WEBHOOK}}"
+                            },
+                            "mapper": {
+                              "channel": "#errors",
+                              "text": "🚨 *MCA Qualification Failed*\n\n*Company:* {{1.company_name}}\n*Application ID:* {{1.application_id}}\n*Revenue:* ${{formatNumber(1.annual_revenue; 0; \",\")}}\n*Credit:* {{1.credit_score}}\n*Error:* {{10.error}}\n*Attempt:* {{7.i}} of {{3.MAX_RETRIES}}\n*Timestamp:* {{formatDate(now; \"YYYY-MM-DD HH:mm:ss\")}}"
+                            },
+                            "metadata": {
+                              "designer": {
+                                "x": 3000,
+                                "y": 300
+                              }
+                            }
+                          },
+                          {
+                            "id": 13,
+                            "module": "google-sheets:addRow",
+                            "version": 3,
+                            "parameters": {
+                              "spreadsheetId": "{{3.GOOGLE_SHEET_ID}}",
+                              "sheetName": "Errors"
+                            },
+                            "mapper": {
+                              "values": [
+                                "{{formatDate(now; \"YYYY-MM-DD HH:mm:ss\")}}",
+                                "MCA Qualification",
+                                "{{1.company_name}}",
+                                "{{1.application_id}}",
+                                "{{10.error}}",
+                                "Attempt {{7.i}} of {{3.MAX_RETRIES}}"
+                              ]
+                            },
+                            "metadata": {
+                              "designer": {
+                                "x": 3300,
+                                "y": 300
+                              }
+                            }
+                          },
+                          {
+                            "id": 14,
+                            "module": "util:Break",
+                            "version": 1,
+                            "parameters": {},
+                            "filter": {
+                              "name": "Stop if max retries reached",
+                              "conditions": [
+                                [
+                                  {
+                                    "a": "{{7.i}}",
+                                    "o": "number:equal",
+                                    "b": "{{3.MAX_RETRIES}}"
+                                  }
+                                ]
+                              ]
+                            },
+                            "mapper": {},
+                            "metadata": {
+                              "designer": {
+                                "x": 3600,
+                                "y": 300
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "notes": "EXECUTE PYTHON SCRIPT\n\nRuns mca_qualification.py with JSON input"
+            },
+            {
+              "id": 15,
+              "module": "util:JSONParse",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "json": "{{10.output}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3000,
+                  "y": 0
+                }
+              }
+            },
+            {
+              "id": 16,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 3300,
+                  "y": 0
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 17,
+                      "module": "util:Composer",
+                      "version": 1,
+                      "parameters": {},
+                      "filter": {
+                        "name": "APPROVED",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{15.qualification_result.decision}}",
+                              "o": "text:equal",
+                              "b": "APPROVED"
+                            }
+                          ]
+                        ]
+                      },
+                      "mapper": {
+                        "text": "✅ *MCA APPLICATION APPROVED*\n\n*Company:* {{1.company_name}}\n*Application ID:* {{1.application_id}}\n*Industry:* {{if(1.industry; 1.industry; \"General Business\")}}\n*Risk Level:* {{upper(15.qualification_result.risk_level)}} {{if(15.qualification_result.risk_level == \"low\"; \"🟢\"; if(15.qualification_result.risk_level == \"medium\"; \"🟡\"; \"🟠\"))}}\n\n*💰 Recommended Advance:*\n• Range: ${{formatNumber(15.qualification_result.recommended_advance_amount.min; 0; \",\")}} - ${{formatNumber(15.qualification_result.recommended_advance_amount.max; 0; \",\")}}\n• Recommended: *${{formatNumber(15.qualification_result.recommended_advance_amount.recommended; 0; \",\")}}*\n• Factor Rate: {{15.qualification_result.factor_payback_rate}}x\n• Payback Period: {{15.qualification_result.estimated_payback_months}} months\n\n*📊 Application Details:*\n• Annual Revenue: ${{formatNumber(1.annual_revenue; 0; \",\")}}\n• Credit Score: {{1.credit_score}}\n• Business Age: {{1.business_age_months}} months ({{round(1.business_age_months / 12; 1)}} years)\n{{if(1.existing_debt; \"• Existing Debt: $\" + formatNumber(1.existing_debt; 0; \",\"); \"\")}}\n\n*🔍 Decision Factors:*\n• *Revenue:* {{15.qualification_result.decision_factors.revenue_assessment}}\n• *Credit:* {{15.qualification_result.decision_factors.credit_assessment}}\n• *Stability:* {{15.qualification_result.decision_factors.business_stability}}\n• *Industry:* {{15.qualification_result.decision_factors.industry_risk}}\n• *Debt:* {{15.qualification_result.decision_factors.debt_burden}}\n\n{{if(length(15.qualification_result.approval_conditions) > 0; \"*⚠️ Approval Conditions:*\\n\" + join(map(15.qualification_result.approval_conditions; \"• \" + item); newline); \"\")}}\n\n{{if(length(15.qualification_result.red_flags) > 0; \"*🚩 Red Flags:*\\n\" + join(map(15.qualification_result.red_flags; \"• \" + item); newline); \"\")}}\n\n*📝 Underwriter Notes:*\n{{15.qualification_result.underwriter_notes}}\n\n*🎯 NEXT STEPS: Review and process approval*\n\n_Applicant Email: {{1.applicant_email}}_\n_Decision Date: {{formatDate(15.qualification_metadata.timestamp; \"YYYY-MM-DD HH:mm:ss\")}}_"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3600,
+                          "y": -300
+                        }
+                      },
+                      "notes": "FORMAT FOR APPROVED APPLICATIONS\n\nDetailed approval information for underwriters"
+                    },
+                    {
+                      "id": 18,
+                      "module": "slack:ActionCreateMessage",
+                      "version": 1,
+                      "parameters": {
+                        "token": "{{3.SLACK_APPROVED_WEBHOOK}}"
+                      },
+                      "mapper": {
+                        "channel": "#underwriter-queue",
+                        "text": "{{17.text}}",
+                        "blocks": [
+                          {
+                            "type": "section",
+                            "text": {
+                              "type": "mrkdwn",
+                              "text": "{{17.text}}"
+                            }
+                          },
+                          {
+                            "type": "actions",
+                            "elements": [
+                              {
+                                "type": "button",
+                                "text": {
+                                  "type": "plain_text",
+                                  "text": "📄 View Application"
+                                },
+                                "url": "https://docs.google.com/spreadsheets/d/{{3.GOOGLE_SHEET_ID}}",
+                                "style": "primary"
+                              },
+                              {
+                                "type": "button",
+                                "text": {
+                                  "type": "plain_text",
+                                  "text": "📋 Compliance Log"
+                                },
+                                "url": "https://docs.google.com/spreadsheets/d/{{3.GOOGLE_SHEET_ID}}/edit#gid=compliance"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3900,
+                          "y": -300
+                        }
+                      },
+                      "notes": "Send to #underwriter-queue for processing"
+                    },
+                    {
+                      "id": 19,
+                      "module": "email:SendEmail",
+                      "version": 1,
+                      "parameters": {},
+                      "filter": {
+                        "name": "Only if applicant email provided",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{1.applicant_email}}",
+                              "o": "text:notequal",
+                              "b": ""
+                            }
+                          ]
+                        ]
+                      },
+                      "mapper": {
+                        "from": "{{3.EMAIL_FROM}}",
+                        "to": "{{1.applicant_email}}",
+                        "subject": "MCA Application Approved - {{1.company_name}}",
+                        "body": "Dear {{1.company_name}} Team,\n\nGreat news! Your Merchant Cash Advance application ({{1.application_id}}) has been APPROVED.\n\nAPPROVAL SUMMARY:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nRecommended Advance Amount: ${{formatNumber(15.qualification_result.recommended_advance_amount.recommended; 0; \",\")}}\nAdvance Range: ${{formatNumber(15.qualification_result.recommended_advance_amount.min; 0; \",\")}} - ${{formatNumber(15.qualification_result.recommended_advance_amount.max; 0; \",\")}}\nFactor Rate: {{15.qualification_result.factor_payback_rate}}x\nEstimated Payback: {{15.qualification_result.estimated_payback_months}} months\nRisk Assessment: {{upper(15.qualification_result.risk_level)}}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nWHAT HAPPENS NEXT:\n\n1. Our underwriting team will contact you within 24 hours\n2. We'll review final documentation and terms\n3. Upon acceptance, funds can be disbursed within 3-5 business days\n\n{{if(length(15.qualification_result.approval_conditions) > 0; \"APPROVAL CONDITIONS:\\n\" + join(map(15.qualification_result.approval_conditions; \"• \" + item); newline) + \"\\n\\n\"; \"\")}}\nQUESTIONS?\nReply to this email or call us at [YOUR PHONE NUMBER]\n\nCongratulations on your approval!\n\nBest regards,\nMCA Qualification Team\n\nApplication ID: {{1.application_id}}\nDecision Date: {{formatDate(15.qualification_metadata.timestamp; \"YYYY-MM-DD\")}}\n\n---\nThis is an automated notification. Your application details are confidential."
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 4200,
+                          "y": -300
+                        }
+                      },
+                      "notes": "EMAIL: Approval notification to applicant"
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 20,
+                      "module": "util:Composer",
+                      "version": 1,
+                      "parameters": {},
+                      "filter": {
+                        "name": "REJECTED",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{15.qualification_result.decision}}",
+                              "o": "text:equal",
+                              "b": "REJECTED"
+                            }
+                          ]
+                        ]
+                      },
+                      "mapper": {
+                        "text": "❌ *MCA APPLICATION REJECTED*\n\n*Company:* {{1.company_name}}\n*Application ID:* {{1.application_id}}\n*Industry:* {{if(1.industry; 1.industry; \"General Business\")}}\n\n*📊 Application Details:*\n• Annual Revenue: ${{formatNumber(1.annual_revenue; 0; \",\")}} {{if(1.annual_revenue < 3.MIN_REVENUE; \"⚠️ (Below minimum: $\" + formatNumber(3.MIN_REVENUE; 0; \",\") + \")\"; \"\")}}\n• Credit Score: {{1.credit_score}} {{if(1.credit_score < 3.MIN_CREDIT_SCORE; \"⚠️ (Below minimum: \" + 3.MIN_CREDIT_SCORE + \")\"; \"\")}}\n• Business Age: {{1.business_age_months}} months {{if(1.business_age_months < 3.MIN_BUSINESS_AGE; \"⚠️ (Below minimum: \" + 3.MIN_BUSINESS_AGE + \" months)\"; \"\")}}\n{{if(1.existing_debt; \"• Existing Debt: $\" + formatNumber(1.existing_debt; 0; \",\"); \"\")}}\n\n*🔍 Rejection Factors:*\n• *Revenue:* {{15.qualification_result.decision_factors.revenue_assessment}}\n• *Credit:* {{15.qualification_result.decision_factors.credit_assessment}}\n• *Stability:* {{15.qualification_result.decision_factors.business_stability}}\n• *Industry:* {{15.qualification_result.decision_factors.industry_risk}}\n• *Debt:* {{15.qualification_result.decision_factors.debt_burden}}\n\n{{if(length(15.qualification_result.red_flags) > 0; \"*🚩 Key Issues:*\\n\" + join(map(15.qualification_result.red_flags; \"• \" + item); newline) + \"\\n\\n\"; \"\")}}\n*📝 Underwriter Notes:*\n{{15.qualification_result.underwriter_notes}}\n\n_Applicant Email: {{1.applicant_email}}_\n_Decision Date: {{formatDate(15.qualification_metadata.timestamp; \"YYYY-MM-DD HH:mm:ss\")}}_"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3600,
+                          "y": 300
+                        }
+                      },
+                      "notes": "FORMAT FOR REJECTED APPLICATIONS"
+                    },
+                    {
+                      "id": 21,
+                      "module": "slack:ActionCreateMessage",
+                      "version": 1,
+                      "parameters": {
+                        "token": "{{3.SLACK_REJECTED_WEBHOOK}}"
+                      },
+                      "mapper": {
+                        "channel": "#rejections-log",
+                        "text": "{{20.text}}",
+                        "blocks": [
+                          {
+                            "type": "section",
+                            "text": {
+                              "type": "mrkdwn",
+                              "text": "{{20.text}}"
+                            }
+                          },
+                          {
+                            "type": "actions",
+                            "elements": [
+                              {
+                                "type": "button",
+                                "text": {
+                                  "type": "plain_text",
+                                  "text": "📄 View Application"
+                                },
+                                "url": "https://docs.google.com/spreadsheets/d/{{3.GOOGLE_SHEET_ID}}"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3900,
+                          "y": 300
+                        }
+                      },
+                      "notes": "Send to #rejections-log"
+                    },
+                    {
+                      "id": 22,
+                      "module": "email:SendEmail",
+                      "version": 1,
+                      "parameters": {},
+                      "filter": {
+                        "name": "Only if applicant email provided",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{1.applicant_email}}",
+                              "o": "text:notequal",
+                              "b": ""
+                            }
+                          ]
+                        ]
+                      },
+                      "mapper": {
+                        "from": "{{3.EMAIL_FROM}}",
+                        "to": "{{1.applicant_email}}",
+                        "subject": "MCA Application Decision - {{1.company_name}}",
+                        "body": "Dear {{1.company_name}} Team,\n\nThank you for your Merchant Cash Advance application ({{1.application_id}}).\n\nAfter careful review, we are unable to approve your application at this time.\n\nAPPLICATION SUMMARY:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nAnnual Revenue: ${{formatNumber(1.annual_revenue; 0; \",\")}}\nCredit Score: {{1.credit_score}}\nBusiness Age: {{1.business_age_months}} months ({{round(1.business_age_months / 12; 1)}} years)\nDecision Date: {{formatDate(15.qualification_metadata.timestamp; \"YYYY-MM-DD\")}}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nWHY THIS DECISION WAS MADE:\n\nOur qualification criteria include:\n• Minimum annual revenue: ${{formatNumber(3.MIN_REVENUE; 0; \",\")}}\n• Minimum credit score: {{3.MIN_CREDIT_SCORE}}\n• Minimum business age: {{3.MIN_BUSINESS_AGE}} months\n• Reasonable debt-to-revenue ratio\n\nYour application did not meet one or more of these criteria at this time.\n\nWHAT YOU CAN DO:\n\n1. REAPPLY LATER: You may reapply after:\n   • Growing your revenue\n   • Improving your credit score\n   • Operating longer (if age was a factor)\n   • Reducing existing debt burden\n\n2. ALTERNATIVE OPTIONS:\n   • Business credit cards\n   • SBA microloans\n   • Revenue-based financing\n   • Equipment financing\n\n3. CREDIT IMPROVEMENT:\n   • Pay bills on time\n   • Reduce credit utilization\n   • Dispute any credit report errors\n\nQUESTIONS?\nReply to this email or call us at [YOUR PHONE NUMBER]\n\nWe appreciate your interest and wish you success in growing your business.\n\nBest regards,\nMCA Qualification Team\n\nApplication ID: {{1.application_id}}\n\n---\nThis is an automated notification. Your application details are confidential.\n\nYou may reapply after 90 days or when business conditions improve."
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 4200,
+                          "y": 300
+                        }
+                      },
+                      "notes": "EMAIL: Rejection notification with improvement tips"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": 23,
+              "module": "google-sheets:addRow",
+              "version": 3,
+              "parameters": {
+                "spreadsheetId": "{{3.GOOGLE_SHEET_ID}}",
+                "sheetName": "MCA Applications"
+              },
+              "mapper": {
+                "values": [
+                  "{{formatDate(15.qualification_metadata.timestamp; \"YYYY-MM-DD HH:mm:ss\")}}",
+                  "{{1.application_id}}",
+                  "{{1.company_name}}",
+                  "{{if(1.industry; 1.industry; \"General Business\")}}",
+                  "{{15.qualification_result.decision}}",
+                  "{{15.qualification_result.risk_level}}",
+                  "{{formatNumber(1.annual_revenue; 0)}}",
+                  "{{1.credit_score}}",
+                  "{{1.business_age_months}}",
+                  "{{if(1.existing_debt; formatNumber(1.existing_debt; 0); \"0\")}}",
+                  "{{if(15.qualification_result.decision == \"APPROVED\"; formatNumber(15.qualification_result.recommended_advance_amount.recommended; 0); \"\")}}",
+                  "{{if(15.qualification_result.decision == \"APPROVED\"; 15.qualification_result.factor_payback_rate; \"\")}}",
+                  "{{if(15.qualification_result.decision == \"APPROVED\"; 15.qualification_result.estimated_payback_months; \"\")}}",
+                  "{{1.applicant_email}}"
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 4500,
+                  "y": 0
+                }
+              },
+              "notes": "Save application to Google Sheet\n\nColumns:\n- Timestamp\n- Application ID\n- Company Name\n- Industry\n- Decision\n- Risk Level\n- Annual Revenue\n- Credit Score\n- Business Age\n- Existing Debt\n- Recommended Advance\n- Factor Rate\n- Payback Months\n- Applicant Email"
+            },
+            {
+              "id": 24,
+              "module": "google-sheets:addRow",
+              "version": 3,
+              "parameters": {
+                "spreadsheetId": "{{3.GOOGLE_SHEET_ID}}",
+                "sheetName": "Compliance Log"
+              },
+              "mapper": {
+                "values": [
+                  "{{formatDate(15.qualification_metadata.timestamp; \"YYYY-MM-DD HH:mm:ss\")}}",
+                  "{{1.application_id}}",
+                  "{{1.company_name}}",
+                  "{{15.qualification_result.decision}}",
+                  "{{15.qualification_result.risk_level}}",
+                  "{{15.qualification_result.decision_factors.revenue_assessment}}",
+                  "{{15.qualification_result.decision_factors.credit_assessment}}",
+                  "{{15.qualification_result.decision_factors.business_stability}}",
+                  "{{15.qualification_result.decision_factors.industry_risk}}",
+                  "{{15.qualification_result.decision_factors.debt_burden}}",
+                  "{{join(15.qualification_result.red_flags; \" | \")}}",
+                  "{{join(15.qualification_result.approval_conditions; \" | \")}}",
+                  "{{15.qualification_result.underwriter_notes}}",
+                  "{{15.compliance_log.minimum_thresholds_met.revenue}}",
+                  "{{15.compliance_log.minimum_thresholds_met.credit_score}}",
+                  "{{15.compliance_log.minimum_thresholds_met.business_age}}",
+                  "{{15.qualification_metadata.model_used}}"
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 4800,
+                  "y": 0
+                }
+              },
+              "notes": "COMPLIANCE LOGGING\n\nDetailed decision factors for audit trail\n\nColumns:\n- Timestamp\n- Application ID\n- Company Name\n- Decision\n- Risk Level\n- Revenue Assessment\n- Credit Assessment\n- Business Stability\n- Industry Risk\n- Debt Burden\n- Red Flags\n- Approval Conditions\n- Underwriter Notes\n- Revenue Threshold Met\n- Credit Threshold Met\n- Age Threshold Met\n- AI Model Version"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": false,
+      "sequential": false,
+      "confidential": true,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "us1.make.com"
+  },
+  "notes": "# MCA QUALIFICATION SYSTEM - PRODUCTION BLUEPRINT\n\n## FEATURES:\n✅ Webhook trigger with comprehensive validation\n✅ Revenue range validation (>$0, <$100M)\n✅ Credit score validation (300-850)\n✅ Error handling with Slack notifications\n✅ Retry logic (3 attempts, 5s delays)\n✅ Conditional routing by decision:\n   - APPROVED → #underwriter-queue\n   - REJECTED → #rejections-log\n✅ Email notifications:\n   - Approval: Detailed terms and next steps\n   - Rejection: Constructive feedback and reapplication guidance\n✅ Compliance logging with detailed decision factors\n✅ Google Sheets tracking\n✅ Configurable thresholds\n\n## SETUP INSTRUCTIONS:\n\n1. **Import this blueprint** to Make.com\n\n2. **Configure variables** in Module #3 (Set Variables):\n   - GOOGLE_SHEET_ID: Your MCA applications sheet\n   - SLACK_APPROVED_WEBHOOK: #underwriter-queue channel\n   - SLACK_REJECTED_WEBHOOK: #rejections-log channel\n   - SLACK_ERROR_WEBHOOK: #errors channel\n   - EMAIL_FROM: Your notification email address\n   - MIN_REVENUE: Minimum annual revenue (default: $100,000)\n   - MIN_CREDIT_SCORE: Minimum credit score (default: 500)\n   - MIN_BUSINESS_AGE: Minimum business age in months (default: 6)\n\n3. **Set up Google Sheet** with these tabs:\n   - \"MCA Applications\" (main application log)\n   - \"Compliance Log\" (detailed decision factors for auditing)\n   - \"Errors\" (error log)\n\n4. **Configure Slack webhooks**:\n   - Create incoming webhook for #underwriter-queue\n   - Create incoming webhook for #rejections-log\n   - Create incoming webhook for #errors\n\n5. **Set up email service** in Make.com:\n   - Connect your email provider\n   - Configure FROM address\n\n6. **Test with sample payloads** (see Module #1 notes)\n\n## GOOGLE SHEET STRUCTURE:\n\n### MCA Applications Sheet:\nTimestamp | Application ID | Company Name | Industry | Decision | Risk Level | Annual Revenue | Credit Score | Business Age | Existing Debt | Recommended Advance | Factor Rate | Payback Months | Applicant Email\n\n### Compliance Log Sheet:\nTimestamp | Application ID | Company Name | Decision | Risk Level | Revenue Assessment | Credit Assessment | Business Stability | Industry Risk | Debt Burden | Red Flags | Approval Conditions | Underwriter Notes | Revenue Threshold Met | Credit Threshold Met | Age Threshold Met | AI Model Version\n\n### Errors Sheet:\nTimestamp | System | Company Name | Application ID | Error Message | Retry Info\n\n## QUALIFICATION CRITERIA:\n\n**Minimum Thresholds (configurable):**\n- Annual Revenue: $100,000\n- Credit Score: 500\n- Business Age: 6 months\n- Debt-to-Revenue Ratio: <50%\n\n**Risk Levels:**\n- Low: Strong financials, excellent credit\n- Medium: Moderate financials, fair credit\n- High: Borderline qualifications, credit issues\n\n**Advance Amount:**\n- Typically 10-50% of annual revenue\n- Factor rate: 1.15-1.35x based on risk\n- Payback: 6-18 months\n\n## DECISION ROUTING:\n\n**APPROVED Applications:**\n- Slack: #underwriter-queue (detailed approval info)\n- Email: Approval letter with terms and next steps\n- Action: Underwriter review within 24 hours\n- Includes: Advance amounts, factor rates, conditions\n\n**REJECTED Applications:**\n- Slack: #rejections-log (rejection reasons)\n- Email: Professional rejection with improvement tips\n- Guidance: Reapplication criteria and alternatives\n- Tone: Constructive and encouraging\n\n## COMPLIANCE:\n\nThe Compliance Log sheet provides a complete audit trail:\n- All decision factors documented\n- Threshold checks recorded\n- AI model version tracked\n- Red flags identified\n- Approval conditions listed\n\nThis ensures regulatory compliance and provides documentation for:\n- Fair lending practices\n- Decision transparency\n- Risk management\n- Quality assurance\n\n## EMAIL TEMPLATES:\n\n**Approval Email:**\n- Congratulatory tone\n- Clear terms and amounts\n- Next steps outlined\n- Contact information\n- Approval conditions (if any)\n\n**Rejection Email:**\n- Professional and respectful\n- Clear explanation of criteria\n- Constructive improvement suggestions\n- Alternative financing options\n- Reapplication guidance\n- 90-day reapplication timeline\n\n## WEBHOOK URL:\nAfter import, get webhook URL from Module #1\n\n## DEPENDENCIES:\n- Python 3.8+ with mca_qualification.py\n- Google Sheets API connection\n- Slack workspace with webhook URLs\n- Email service connection\n- Anthropic API key (in Python script .env)\n\n## SECURITY:\n- Blueprint marked as CONFIDENTIAL\n- Sensitive financial data\n- Secure webhook URLs\n- Encrypted API communications\n\n## SUPPORT:\nCheck module notes for detailed configuration help"
+}
