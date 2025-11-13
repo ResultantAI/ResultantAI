@@ -1,0 +1,207 @@
+{
+  "minimum_requirements": {
+    "monthly_revenue": 10000,
+    "time_in_business_months": 6,
+    "credit_score": 500,
+    "description": "Absolute minimum thresholds for MCA consideration",
+    "notes": "Applicants below these thresholds are automatically declined"
+  },
+  "revenue_tiers": {
+    "tier_1": {
+      "min": 100000,
+      "max_advance_percentage": 250,
+      "description": "High revenue ($100k+/month)",
+      "notes": "Can advance up to 2.5x monthly revenue"
+    },
+    "tier_2": {
+      "min": 50000,
+      "max_advance_percentage": 200,
+      "description": "Strong revenue ($50k-100k/month)",
+      "notes": "Can advance up to 2x monthly revenue"
+    },
+    "tier_3": {
+      "min": 25000,
+      "max_advance_percentage": 150,
+      "description": "Good revenue ($25k-50k/month)",
+      "notes": "Can advance up to 1.5x monthly revenue"
+    },
+    "tier_4": {
+      "min": 10000,
+      "max_advance_percentage": 100,
+      "description": "Minimum revenue ($10k-25k/month)",
+      "notes": "Can advance up to 1x monthly revenue"
+    }
+  },
+  "credit_score_tiers": {
+    "excellent": {
+      "min": 720,
+      "factor_rate_adjustment": -0.05,
+      "description": "Excellent credit (720+)",
+      "notes": "5% reduction in factor rate"
+    },
+    "good": {
+      "min": 680,
+      "factor_rate_adjustment": 0.0,
+      "description": "Good credit (680-719)",
+      "notes": "Standard factor rate"
+    },
+    "fair": {
+      "min": 620,
+      "factor_rate_adjustment": 0.03,
+      "description": "Fair credit (620-679)",
+      "notes": "3% increase in factor rate"
+    },
+    "poor": {
+      "min": 550,
+      "factor_rate_adjustment": 0.08,
+      "description": "Poor credit (550-619)",
+      "notes": "8% increase in factor rate"
+    },
+    "very_poor": {
+      "min": 500,
+      "factor_rate_adjustment": 0.15,
+      "description": "Very poor credit (500-549)",
+      "notes": "15% increase in factor rate"
+    }
+  },
+  "time_in_business_multipliers": {
+    "established": {
+      "min_months": 36,
+      "multiplier": 1.2,
+      "description": "3+ years in business",
+      "notes": "20% increase in advance amount"
+    },
+    "mature": {
+      "min_months": 24,
+      "multiplier": 1.1,
+      "description": "2-3 years in business",
+      "notes": "10% increase in advance amount"
+    },
+    "growing": {
+      "min_months": 12,
+      "multiplier": 1.0,
+      "description": "1-2 years in business",
+      "notes": "Standard advance amount"
+    },
+    "new": {
+      "min_months": 6,
+      "multiplier": 0.8,
+      "description": "6-12 months in business",
+      "notes": "20% reduction in advance amount"
+    }
+  },
+  "industry_risk_factors": {
+    "low_risk": {
+      "industries": [
+        "Healthcare",
+        "Professional Services",
+        "Technology",
+        "Education",
+        "Legal Services",
+        "Accounting"
+      ],
+      "factor_rate_adjustment": -0.02,
+      "description": "Stable, low-risk industries",
+      "notes": "2% reduction in factor rate"
+    },
+    "medium_risk": {
+      "industries": [
+        "Retail",
+        "E-commerce",
+        "Construction",
+        "Manufacturing",
+        "Wholesale",
+        "Real Estate"
+      ],
+      "factor_rate_adjustment": 0.0,
+      "description": "Moderate-risk industries",
+      "notes": "Standard factor rate"
+    },
+    "high_risk": {
+      "industries": [
+        "Restaurant",
+        "Hospitality",
+        "Auto Repair",
+        "Salon/Spa",
+        "Fitness",
+        "Entertainment",
+        "Transportation"
+      ],
+      "factor_rate_adjustment": 0.05,
+      "description": "Higher-risk industries with volatility",
+      "notes": "5% increase in factor rate due to higher default rates"
+    }
+  },
+  "base_factor_rates": {
+    "premium": {
+      "min_score": 85,
+      "factor_rate": 1.15,
+      "description": "Premium terms (Score 85+)",
+      "notes": "Best possible terms - 15% cost"
+    },
+    "standard": {
+      "min_score": 70,
+      "factor_rate": 1.25,
+      "description": "Standard terms (Score 70-84)",
+      "notes": "Good terms - 25% cost"
+    },
+    "subprime": {
+      "min_score": 50,
+      "factor_rate": 1.35,
+      "description": "Subprime terms (Score 50-69)",
+      "notes": "Higher cost - 35% cost"
+    },
+    "high_risk": {
+      "min_score": 0,
+      "factor_rate": 1.45,
+      "description": "High-risk terms (Score <50)",
+      "notes": "Highest cost - 45% cost"
+    }
+  },
+  "repayment_terms": {
+    "short": {
+      "months": 3,
+      "multiplier": 0.95,
+      "description": "3-month term",
+      "notes": "Faster repayment, slight discount"
+    },
+    "standard": {
+      "months": 6,
+      "multiplier": 1.0,
+      "description": "6-month term (recommended)",
+      "notes": "Standard term for most approvals"
+    },
+    "extended": {
+      "months": 9,
+      "multiplier": 1.05,
+      "description": "9-month term",
+      "notes": "Extended term, slight premium"
+    },
+    "long": {
+      "months": 12,
+      "multiplier": 1.1,
+      "description": "12-month term",
+      "notes": "Longest term, higher total cost"
+    }
+  },
+  "configuration_notes": {
+    "purpose": "Defines MCA qualification criteria and pricing parameters",
+    "customization": "Adjust criteria to match your risk appetite and market positioning",
+    "compliance": "Ensure all rates comply with state and federal lending regulations",
+    "examples": {
+      "conservative_lender": "Increase minimum_requirements, reduce max_advance_percentage",
+      "aggressive_lender": "Lower minimum_requirements, increase factor_rates for risk",
+      "industry_specialist": "Add custom industry categories with favorable adjustments"
+    },
+    "factor_rate_explanation": "Factor rate is multiplied by advance amount to calculate total repayment. E.g., $50,000 advance at 1.25 factor = $62,500 total repayment.",
+    "scoring_breakdown": {
+      "revenue": "40 points (most important factor)",
+      "credit_score": "25 points (creditworthiness)",
+      "time_in_business": "20 points (stability)",
+      "industry": "15 points (risk profile)"
+    }
+  },
+  "version": "1.0",
+  "last_updated": "2025-11-13",
+  "compliance_disclaimer": "This configuration is for demonstration purposes. Consult legal counsel for actual lending operations."
+}
