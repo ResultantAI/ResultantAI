@@ -1,0 +1,569 @@
+{
+  "name": "Lead Enrichment Pipeline",
+  "flow": [
+    {
+      "id": 1,
+      "module": "hubspot:watchContacts",
+      "version": 1,
+      "parameters": {
+        "connection": "YOUR_HUBSPOT_CONNECTION_ID"
+      },
+      "mapper": {
+        "limit": "10"
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "connection": {
+              "label": "My HubSpot Connection",
+              "data": {
+                "scoped": "true",
+                "connection": "hubspot"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "connection",
+            "type": "account",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "limit",
+            "type": "number",
+            "label": "Maximum number of results"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "conditions": [
+          [
+            {
+              "a": "{{1.website}}",
+              "b": "",
+              "o": "text:notequal"
+            },
+            {
+              "a": "{{1.enrichment_status}}",
+              "b": "completed",
+              "o": "text:notequal"
+            }
+          ]
+        ],
+        "label": "Filter: Has Website & Not Enriched"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {},
+      "mapper": {
+        "url": "https://YOUR_SERVER_URL/execute-script",
+        "serializeUrl": false,
+        "method": "post",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "name": "Authorization",
+            "value": "Bearer {{YOUR_API_TOKEN}}"
+          }
+        ],
+        "qs": [],
+        "bodyType": "raw",
+        "parseResponse": true,
+        "timeout": 300000,
+        "shareCookies": false,
+        "rejectUnauthorized": true,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "gzip": true,
+        "useMtls": false,
+        "contentType": "application/json",
+        "body": "{\n  \"script\": \"lead_enrichment.py\",\n  \"args\": {\n    \"domain\": \"{{1.website}}\",\n    \"company\": \"{{1.company}}\"\n  }\n}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        },
+        "restore": {
+          "expect": {
+            "method": {
+              "label": "POST"
+            },
+            "headers": {
+              "items": [null, null]
+            },
+            "bodyType": {
+              "label": "Raw"
+            },
+            "contentType": {
+              "label": "JSON (application/json)"
+            }
+          }
+        },
+        "expect": [
+          {
+            "name": "url",
+            "type": "url",
+            "label": "URL",
+            "required": true
+          },
+          {
+            "name": "method",
+            "type": "select",
+            "label": "Method",
+            "required": true
+          },
+          {
+            "name": "body",
+            "type": "text",
+            "label": "Request content"
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{3.data}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        },
+        "expect": [
+          {
+            "name": "json",
+            "type": "text",
+            "label": "JSON string",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": {},
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "filter": {
+        "name": "Hot Lead (Score > 80)",
+        "conditions": [
+          [
+            {
+              "a": "{{4.lead_score}}",
+              "b": "80",
+              "o": "number:greater"
+            }
+          ]
+        ]
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": -300
+        }
+      }
+    },
+    {
+      "id": 7,
+      "module": "hubspot:updateContact",
+      "version": 1,
+      "parameters": {
+        "connection": "YOUR_HUBSPOT_CONNECTION_ID"
+      },
+      "mapper": {
+        "contactId": "{{1.id}}",
+        "properties": {
+          "enrichment_status": "completed",
+          "enrichment_date": "{{4.enrichment_metadata.timestamp}}",
+          "icp_score": "{{4.lead_score}}",
+          "lead_category": "{{4.lead_category}}",
+          "company_size": "{{4.enrichment_data.company_size.estimated_employees}}",
+          "company_industry": "{{4.enrichment_data.company_profile.industry}}",
+          "funding_stage": "{{4.enrichment_data.funding_and_growth.funding_stage}}",
+          "tech_stack": "{{join(4.enrichment_data.technology_stack.confirmed_technologies; \", \")}}",
+          "lead_status": "hot_lead",
+          "lead_priority": "high",
+          "next_action": "immediate_outreach"
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": -300
+        },
+        "restore": {
+          "parameters": {
+            "connection": {
+              "label": "My HubSpot Connection"
+            }
+          }
+        },
+        "expect": [
+          {
+            "name": "contactId",
+            "type": "text",
+            "label": "Contact ID",
+            "required": true
+          },
+          {
+            "name": "properties",
+            "type": "collection",
+            "label": "Properties"
+          }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "module": "slack:createMessage",
+      "version": 1,
+      "parameters": {
+        "connection": "YOUR_SLACK_CONNECTION_ID"
+      },
+      "mapper": {
+        "channel": "C_HOT_LEADS_CHANNEL",
+        "text": "🔥 *HOT LEAD ALERT!*\n\n*Company:* {{4.enrichment_metadata.company_name}}\n*Domain:* {{4.enrichment_metadata.domain}}\n*ICP Score:* {{4.lead_score}}/100\n*Category:* {{upper(replace(4.lead_category; \"_\"; \" \"))}}\n\n*📊 Profile:*\n• Industry: {{4.enrichment_data.company_profile.industry}}\n• Size: {{4.enrichment_data.company_size.estimated_employees}} employees\n• Funding: {{4.enrichment_data.funding_and_growth.funding_stage}}\n• Tech Stack: {{join(4.enrichment_data.technology_stack.confirmed_technologies; \", \")}}\n\n*🎯 Recommendation:*\n{{4.recommendation}}\n\n*👉 Action:* <https://app.hubspot.com/contacts/YOUR_PORTAL_ID/contact/{{1.id}}|View in HubSpot>",
+        "as_user": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 2100,
+          "y": -300
+        },
+        "restore": {
+          "parameters": {
+            "connection": {
+              "label": "My Slack Connection"
+            }
+          }
+        },
+        "expect": [
+          {
+            "name": "channel",
+            "type": "select",
+            "label": "Channel",
+            "required": true
+          },
+          {
+            "name": "text",
+            "type": "text",
+            "label": "Text",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "filter": {
+        "name": "Warm Lead (Score 60-80)",
+        "conditions": [
+          [
+            {
+              "a": "{{4.lead_score}}",
+              "b": "60",
+              "o": "number:greaterorequal"
+            },
+            {
+              "a": "{{4.lead_score}}",
+              "b": "80",
+              "o": "number:lessorequal"
+            }
+          ]
+        ]
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 10,
+      "module": "hubspot:updateContact",
+      "version": 1,
+      "parameters": {
+        "connection": "YOUR_HUBSPOT_CONNECTION_ID"
+      },
+      "mapper": {
+        "contactId": "{{1.id}}",
+        "properties": {
+          "enrichment_status": "completed",
+          "enrichment_date": "{{4.enrichment_metadata.timestamp}}",
+          "icp_score": "{{4.lead_score}}",
+          "lead_category": "{{4.lead_category}}",
+          "company_size": "{{4.enrichment_data.company_size.estimated_employees}}",
+          "company_industry": "{{4.enrichment_data.company_profile.industry}}",
+          "funding_stage": "{{4.enrichment_data.funding_and_growth.funding_stage}}",
+          "tech_stack": "{{join(4.enrichment_data.technology_stack.confirmed_technologies; \", \")}}",
+          "lead_status": "warm_lead",
+          "lead_priority": "medium",
+          "next_action": "nurture_sequence"
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "connection": {
+              "label": "My HubSpot Connection"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": 11,
+      "module": "hubspot:enrollContactInSequence",
+      "version": 1,
+      "parameters": {
+        "connection": "YOUR_HUBSPOT_CONNECTION_ID"
+      },
+      "mapper": {
+        "contactId": "{{1.id}}",
+        "sequenceId": "YOUR_NURTURE_SEQUENCE_ID"
+      },
+      "metadata": {
+        "designer": {
+          "x": 2100,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "connection": {
+              "label": "My HubSpot Connection"
+            }
+          }
+        },
+        "expect": [
+          {
+            "name": "contactId",
+            "type": "text",
+            "label": "Contact ID",
+            "required": true
+          },
+          {
+            "name": "sequenceId",
+            "type": "select",
+            "label": "Sequence",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "filter": {
+        "name": "Cold/Poor Fit (Score < 60)",
+        "conditions": [
+          [
+            {
+              "a": "{{4.lead_score}}",
+              "b": "60",
+              "o": "number:less"
+            }
+          ]
+        ]
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 300
+        }
+      }
+    },
+    {
+      "id": 13,
+      "module": "hubspot:updateContact",
+      "version": 1,
+      "parameters": {
+        "connection": "YOUR_HUBSPOT_CONNECTION_ID"
+      },
+      "mapper": {
+        "contactId": "{{1.id}}",
+        "properties": {
+          "enrichment_status": "completed",
+          "enrichment_date": "{{4.enrichment_metadata.timestamp}}",
+          "icp_score": "{{4.lead_score}}",
+          "lead_category": "{{4.lead_category}}",
+          "company_size": "{{4.enrichment_data.company_size.estimated_employees}}",
+          "company_industry": "{{4.enrichment_data.company_profile.industry}}",
+          "funding_stage": "{{4.enrichment_data.funding_and_growth.funding_stage}}",
+          "lead_status": "{{if(4.lead_score > 40; \"cold_lead\"; \"poor_fit\")}}",
+          "lead_priority": "low",
+          "next_action": "long_term_nurture"
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 300
+        },
+        "restore": {
+          "parameters": {
+            "connection": {
+              "label": "My HubSpot Connection"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": 14,
+      "module": "hubspot:enrollContactInSequence",
+      "version": 1,
+      "parameters": {
+        "connection": "YOUR_HUBSPOT_CONNECTION_ID"
+      },
+      "mapper": {
+        "contactId": "{{1.id}}",
+        "sequenceId": "YOUR_LONG_TERM_NURTURE_SEQUENCE_ID"
+      },
+      "metadata": {
+        "designer": {
+          "x": 2100,
+          "y": 300
+        },
+        "restore": {
+          "parameters": {
+            "connection": {
+              "label": "My HubSpot Connection"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": 15,
+      "module": "google-sheets:addRow",
+      "version": 2,
+      "parameters": {
+        "connection": "YOUR_GOOGLE_SHEETS_CONNECTION_ID"
+      },
+      "mapper": {
+        "spreadsheetId": "YOUR_SPREADSHEET_ID",
+        "sheetId": "Lead Enrichment Log",
+        "tableFirstRow": "A1:Z1",
+        "includesHeaders": "true",
+        "values": {
+          "Timestamp": "{{4.enrichment_metadata.timestamp}}",
+          "Contact ID": "{{1.id}}",
+          "Company Name": "{{4.enrichment_metadata.company_name}}",
+          "Domain": "{{4.enrichment_metadata.domain}}",
+          "ICP Score": "{{4.lead_score}}",
+          "Lead Category": "{{4.lead_category}}",
+          "Industry": "{{4.enrichment_data.company_profile.industry}}",
+          "Company Size": "{{4.enrichment_data.company_size.estimated_employees}}",
+          "Funding Stage": "{{4.enrichment_data.funding_and_growth.funding_stage}}",
+          "Tech Stack": "{{join(4.enrichment_data.technology_stack.confirmed_technologies; \", \")}}",
+          "Revenue Score": "{{4.scoring_details.score_breakdown.company_size.weighted_score}}",
+          "Industry Score": "{{4.scoring_details.score_breakdown.industry.weighted_score}}",
+          "Tech Score": "{{4.scoring_details.score_breakdown.tech_stack.weighted_score}}",
+          "Recommendation": "{{4.recommendation}}",
+          "HubSpot URL": "https://app.hubspot.com/contacts/YOUR_PORTAL_ID/contact/{{1.id}}"
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 2400,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "connection": {
+              "label": "My Google Sheets Connection"
+            }
+          },
+          "expect": {
+            "sheetId": {
+              "label": "Lead Enrichment Log"
+            },
+            "includesHeaders": {
+              "label": "Yes"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "scheduling": {
+        "interval": 15,
+        "unit": "minute"
+      },
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "us1.make.com"
+  },
+  "notes": "## Lead Enrichment Pipeline Blueprint\n\n### Setup Instructions:\n\n1. **HubSpot Trigger (Module 1):**\n   - Create HubSpot connection in Make.com\n   - Replace `YOUR_HUBSPOT_CONNECTION_ID`\n   - Set to watch for new contacts\n   - Schedule: Every 15 minutes (or adjust as needed)\n\n2. **Filter (Module 2):**\n   - Ensures contact has website\n   - Checks enrichment hasn't been completed\n   - Add custom property 'enrichment_status' to HubSpot contacts\n\n3. **Python Script Execution (Module 3):**\n   - Replace `YOUR_SERVER_URL` with your server endpoint\n   - Server runs: `source venv/bin/activate && python3 lead_enrichment.py --domain {domain}`\n   - Replace `YOUR_API_TOKEN`\n\n4. **Router (Module 5) - Routes to 3 paths:**\n   - **Path 1 (Hot Lead - Score > 80):**\n     - Updates HubSpot with enrichment data\n     - Sends Slack alert to hot leads channel\n     - Replace `C_HOT_LEADS_CHANNEL` with channel ID\n   \n   - **Path 2 (Warm Lead - Score 60-80):**\n     - Updates HubSpot with enrichment data\n     - Enrolls in nurture sequence\n     - Replace `YOUR_NURTURE_SEQUENCE_ID`\n   \n   - **Path 3 (Cold/Poor Fit - Score < 60):**\n     - Updates HubSpot with enrichment data\n     - Enrolls in long-term nurture\n     - Replace `YOUR_LONG_TERM_NURTURE_SEQUENCE_ID`\n\n5. **Google Sheets Logger (Module 15):**\n   - Replace `YOUR_GOOGLE_SHEETS_CONNECTION_ID`\n   - Replace `YOUR_SPREADSHEET_ID`\n   - Create sheet named 'Lead Enrichment Log'\n   - Headers: Timestamp, Contact ID, Company Name, Domain, ICP Score, Lead Category, Industry, Company Size, Funding Stage, Tech Stack, Revenue Score, Industry Score, Tech Score, Recommendation, HubSpot URL\n\n6. **HubSpot Custom Properties:**\n   Create these custom properties in HubSpot:\n   - enrichment_status (single-line text)\n   - enrichment_date (date)\n   - icp_score (number)\n   - lead_category (single-line text)\n   - company_size (number)\n   - company_industry (single-line text)\n   - funding_stage (single-line text)\n   - tech_stack (multi-line text)\n   - lead_status (dropdown: hot_lead, warm_lead, cold_lead, poor_fit)\n   - lead_priority (dropdown: high, medium, low)\n   - next_action (single-line text)\n\n7. **Replace Portal ID:**\n   - Replace `YOUR_PORTAL_ID` with your HubSpot portal ID\n\n### Testing:\nCreate test contact in HubSpot with:\n- Website: notion.so\n- Company: Notion\n- Enrichment Status: (leave empty)\n\n### Expected Flow:\n1. Trigger checks for new contacts every 15 minutes\n2. Filter ensures contact has website and not enriched\n3. Python script enriches lead data\n4. JSON parser extracts enrichment results\n5. Router splits based on ICP score:\n   - Hot (>80): Slack alert + high priority\n   - Warm (60-80): Nurture sequence\n   - Cold (<60): Long-term nurture\n6. All enrichment data logged to Google Sheets\n"
+}

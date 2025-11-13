@@ -1,0 +1,442 @@
+{
+  "name": "MCA Qualification Workflow",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": "YOUR_WEBHOOK_ID_HERE",
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "restore": {},
+        "parameters": [
+          {
+            "name": "hook",
+            "type": "hook",
+            "label": "Webhook",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "monthly_revenue",
+            "type": "number",
+            "label": "Monthly Revenue",
+            "required": true
+          },
+          {
+            "name": "time_in_business_months",
+            "type": "number",
+            "label": "Time in Business (Months)",
+            "required": true
+          },
+          {
+            "name": "credit_score",
+            "type": "number",
+            "label": "Credit Score",
+            "required": true
+          },
+          {
+            "name": "industry",
+            "type": "text",
+            "label": "Industry",
+            "required": true
+          },
+          {
+            "name": "business_name",
+            "type": "text",
+            "label": "Business Name",
+            "required": true
+          },
+          {
+            "name": "contact_email",
+            "type": "email",
+            "label": "Contact Email",
+            "required": true
+          },
+          {
+            "name": "contact_name",
+            "type": "text",
+            "label": "Contact Name",
+            "required": true
+          },
+          {
+            "name": "phone",
+            "type": "text",
+            "label": "Phone Number"
+          },
+          {
+            "name": "application_id",
+            "type": "text",
+            "label": "Application ID"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {},
+      "mapper": {
+        "url": "https://YOUR_SERVER_URL/execute-script",
+        "serializeUrl": false,
+        "method": "post",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "name": "Authorization",
+            "value": "Bearer {{YOUR_API_TOKEN}}"
+          }
+        ],
+        "qs": [],
+        "bodyType": "raw",
+        "parseResponse": true,
+        "timeout": 300000,
+        "shareCookies": false,
+        "rejectUnauthorized": true,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "gzip": true,
+        "useMtls": false,
+        "contentType": "application/json",
+        "body": "{\n  \"script\": \"mca_qualification.py\",\n  \"args\": {\n    \"monthly_revenue\": {{1.monthly_revenue}},\n    \"time_in_business_months\": {{1.time_in_business_months}},\n    \"credit_score\": {{1.credit_score}},\n    \"industry\": \"{{1.industry}}\"\n  }\n}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        },
+        "restore": {
+          "expect": {
+            "method": {
+              "label": "POST"
+            },
+            "headers": {
+              "items": [null, null]
+            },
+            "bodyType": {
+              "label": "Raw"
+            },
+            "contentType": {
+              "label": "JSON (application/json)"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{2.data}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        },
+        "expect": [
+          {
+            "name": "json",
+            "type": "text",
+            "label": "JSON string",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "module": "google-sheets:addRow",
+      "version": 2,
+      "parameters": {
+        "connection": "YOUR_GOOGLE_SHEETS_CONNECTION_ID"
+      },
+      "mapper": {
+        "spreadsheetId": "YOUR_SPREADSHEET_ID",
+        "sheetId": "MCA Applications",
+        "tableFirstRow": "A1:Z1",
+        "includesHeaders": "true",
+        "values": {
+          "Timestamp": "{{3.qualification_metadata.timestamp}}",
+          "Application ID": "{{1.application_id}}",
+          "Business Name": "{{1.business_name}}",
+          "Contact Name": "{{1.contact_name}}",
+          "Contact Email": "{{1.contact_email}}",
+          "Phone": "{{1.phone}}",
+          "Monthly Revenue": "{{1.monthly_revenue}}",
+          "Time in Business": "{{1.time_in_business_months}}",
+          "Credit Score": "{{1.credit_score}}",
+          "Industry": "{{1.industry}}",
+          "Qualification Score": "{{3.qualification_score.total_score}}",
+          "Grade": "{{3.qualification_score.grade}}",
+          "Decision": "{{3.decision.status}}",
+          "Approval Tier": "{{if(3.decision.decision = \"approved\"; 3.decision.approval_tier; \"N/A\")}}",
+          "Advance Amount": "{{if(3.offer_details.advance_amount; 3.offer_details.advance_amount; 0)}}",
+          "Factor Rate": "{{if(3.offer_details.factor_rate; 3.offer_details.factor_rate; 0)}}",
+          "Total Repayment": "{{if(3.offer_details.total_repayment; 3.offer_details.total_repayment; 0)}}",
+          "Term Months": "{{if(3.offer_details.recommended_term_months; 3.offer_details.recommended_term_months; 0)}}",
+          "Daily Payment": "{{if(3.offer_details.daily_payment; 3.offer_details.daily_payment; 0)}}",
+          "Effective APR": "{{if(3.offer_details.effective_apr; 3.offer_details.effective_apr; 0)}}",
+          "Primary Reason": "{{if(3.decision.primary_reason; 3.decision.primary_reason; first(3.decision.approval_reasons))}}",
+          "Full Response": "{{toString(3)}}"
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "connection": {
+              "label": "My Google Sheets Connection"
+            }
+          },
+          "expect": {
+            "sheetId": {
+              "label": "MCA Applications"
+            },
+            "includesHeaders": {
+              "label": "Yes"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": {},
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "filter": {
+        "name": "APPROVED",
+        "conditions": [
+          [
+            {
+              "a": "{{3.decision.status}}",
+              "b": "APPROVED",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": -300
+        }
+      }
+    },
+    {
+      "id": 7,
+      "module": "email:ActionSendEmail",
+      "version": 3,
+      "parameters": {
+        "account": "YOUR_EMAIL_CONNECTION_ID"
+      },
+      "mapper": {
+        "to": "{{1.contact_email}}",
+        "subject": "🎉 Congratulations! Your MCA Application is Approved",
+        "html": "<html>\n<body style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #333;\">\n  <div style=\"max-width: 600px; margin: 0 auto; padding: 20px;\">\n    <h2 style=\"color: #2ecc71;\">✓ Application Approved</h2>\n    \n    <p>Dear {{1.contact_name}},</p>\n    \n    <p>Great news! Your Merchant Cash Advance application for <strong>{{1.business_name}}</strong> has been <strong>approved</strong>!</p>\n    \n    <div style=\"background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;\">\n      <h3 style=\"margin-top: 0; color: #2c3e50;\">Your Offer Details:</h3>\n      \n      <table style=\"width: 100%; border-collapse: collapse;\">\n        <tr style=\"border-bottom: 1px solid #dee2e6;\">\n          <td style=\"padding: 10px 0;\"><strong>Advance Amount:</strong></td>\n          <td style=\"text-align: right; padding: 10px 0;\">${{formatNumber(3.offer_details.advance_amount; 2; ,; .)}}</td>\n        </tr>\n        <tr style=\"border-bottom: 1px solid #dee2e6;\">\n          <td style=\"padding: 10px 0;\"><strong>Factor Rate:</strong></td>\n          <td style=\"text-align: right; padding: 10px 0;\">{{3.offer_details.factor_rate}}</td>\n        </tr>\n        <tr style=\"border-bottom: 1px solid #dee2e6;\">\n          <td style=\"padding: 10px 0;\"><strong>Total Repayment:</strong></td>\n          <td style=\"text-align: right; padding: 10px 0;\">${{formatNumber(3.offer_details.total_repayment; 2; ,; .)}}</td>\n        </tr>\n        <tr style=\"border-bottom: 1px solid #dee2e6;\">\n          <td style=\"padding: 10px 0;\"><strong>Daily Payment:</strong></td>\n          <td style=\"text-align: right; padding: 10px 0;\">${{formatNumber(3.offer_details.daily_payment; 2; ,; .)}}</td>\n        </tr>\n        <tr style=\"border-bottom: 1px solid #dee2e6;\">\n          <td style=\"padding: 10px 0;\"><strong>Term:</strong></td>\n          <td style=\"text-align: right; padding: 10px 0;\">{{3.offer_details.recommended_term_months}} months</td>\n        </tr>\n        <tr>\n          <td style=\"padding: 10px 0;\"><strong>Approval Tier:</strong></td>\n          <td style=\"text-align: right; padding: 10px 0;\"><span style=\"background: #3498db; color: white; padding: 3px 10px; border-radius: 3px;\">{{3.decision.approval_tier}}</span></td>\n        </tr>\n      </table>\n    </div>\n    \n    <div style=\"background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;\">\n      <p style=\"margin: 0;\"><strong>Note:</strong> Effective APR: {{3.offer_details.effective_apr}}%</p>\n    </div>\n    \n    <h3 style=\"color: #2c3e50;\">Next Steps:</h3>\n    <ol>\n      <li>Review your offer details above</li>\n      <li>One of our underwriters will contact you within 24 hours</li>\n      <li>Prepare required documentation (bank statements, tax returns)</li>\n      <li>Complete final verification</li>\n      <li>Receive funds in 2-3 business days</li>\n    </ol>\n    \n    <p><strong>Application ID:</strong> {{1.application_id}}<br>\n    <strong>Qualification Score:</strong> {{3.qualification_score.total_score}}/100 (Grade {{3.qualification_score.grade}})</p>\n    \n    <p>If you have any questions, please contact us at underwriting@yourcompany.com or call (555) 123-4567.</p>\n    \n    <p style=\"margin-top: 30px;\">Best regards,<br>\n    <strong>Underwriting Team</strong></p>\n  </div>\n</body>\n</html>",
+        "attachments": []
+      },
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": -300
+        },
+        "restore": {
+          "parameters": {
+            "account": {
+              "label": "My Email Connection"
+            }
+          }
+        },
+        "expect": [
+          {
+            "name": "to",
+            "type": "email",
+            "label": "To",
+            "required": true
+          },
+          {
+            "name": "subject",
+            "type": "text",
+            "label": "Subject",
+            "required": true
+          },
+          {
+            "name": "html",
+            "type": "text",
+            "label": "HTML Content"
+          }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "module": "slack:createMessage",
+      "version": 1,
+      "parameters": {
+        "connection": "YOUR_SLACK_CONNECTION_ID"
+      },
+      "mapper": {
+        "channel": "C_UNDERWRITER_QUEUE",
+        "text": "✅ *NEW APPROVED APPLICATION - Underwriter Review Required*\n\n*Business:* {{1.business_name}}\n*Contact:* {{1.contact_name}} ({{1.contact_email}})\n*Application ID:* {{1.application_id}}\n\n*📊 Qualification:*\n• Score: {{3.qualification_score.total_score}}/100 (Grade {{3.qualification_score.grade}})\n• Tier: {{3.decision.approval_tier}}\n• Confidence: {{3.decision.confidence_level}}\n\n*💰 Offer Details:*\n• Advance: ${{formatNumber(3.offer_details.advance_amount; 2; ,; .)}}\n• Factor Rate: {{3.offer_details.factor_rate}}\n• Total Repayment: ${{formatNumber(3.offer_details.total_repayment; 2; ,; .)}}\n• Daily Payment: ${{formatNumber(3.offer_details.daily_payment; 2; ,; .)}}\n• Term: {{3.offer_details.recommended_term_months}} months\n\n*📋 Business Details:*\n• Monthly Revenue: ${{formatNumber(1.monthly_revenue; 0; ,; .)}}\n• Time in Business: {{1.time_in_business_months}} months\n• Credit Score: {{1.credit_score}}\n• Industry: {{1.industry}}\n\n*🎯 Approval Reasons:*\n{{join(3.decision.approval_reasons; \"\n\")}}\n\n{{if(length(3.decision.conditions) > 0; \"*⚠️ Conditions:*\n\" + join(3.decision.conditions; \"\n\"); \"\")}}\n\n*👉 Action Required:* Review application and contact applicant within 24 hours",
+        "as_user": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 2100,
+          "y": -300
+        },
+        "restore": {
+          "parameters": {
+            "connection": {
+              "label": "My Slack Connection"
+            }
+          }
+        },
+        "expect": [
+          {
+            "name": "channel",
+            "type": "select",
+            "label": "Channel",
+            "required": true
+          },
+          {
+            "name": "text",
+            "type": "text",
+            "label": "Text",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "filter": {
+        "name": "REJECTED",
+        "conditions": [
+          [
+            {
+              "a": "{{3.decision.status}}",
+              "b": "REJECTED",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 300
+        }
+      }
+    },
+    {
+      "id": 10,
+      "module": "email:ActionSendEmail",
+      "version": 3,
+      "parameters": {
+        "account": "YOUR_EMAIL_CONNECTION_ID"
+      },
+      "mapper": {
+        "to": "{{1.contact_email}}",
+        "subject": "Update on Your MCA Application - {{1.application_id}}",
+        "html": "<html>\n<body style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #333;\">\n  <div style=\"max-width: 600px; margin: 0 auto; padding: 20px;\">\n    <h2 style=\"color: #e74c3c;\">Application Status Update</h2>\n    \n    <p>Dear {{1.contact_name}},</p>\n    \n    <p>Thank you for applying for a Merchant Cash Advance with us for <strong>{{1.business_name}}</strong>.</p>\n    \n    <p>After careful review of your application, we regret to inform you that we are unable to approve your request at this time.</p>\n    \n    <div style=\"background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;\">\n      <h3 style=\"margin-top: 0; color: #2c3e50;\">Reason for Decision:</h3>\n      <p style=\"margin: 0;\">{{3.decision.primary_reason}}</p>\n    </div>\n    \n    {{if(length(3.decision.rejection_reasons) > 0; \"\n    <div style='background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;'>\n      <h4 style='margin-top: 0;'>Specific Factors:</h4>\n      <ul>\n        \" + join(map(3.decision.rejection_reasons; \"<li>\" + item + \"</li>\"); \"\") + \"\n      </ul>\n    </div>\n    \"; \"\")}}\n    \n    <h3 style=\"color: #2c3e50;\">💡 Recommendations to Improve Your Qualification:</h3>\n    <ul>\n      {{join(map(if(3.decision.recommendations; 3.decision.recommendations; emptyarray); \"<li>\" + item + \"</li>\"); \"\")}}\n    </ul>\n    \n    <div style=\"background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 20px 0;\">\n      <h4 style=\"margin-top: 0;\">When Can I Reapply?</h4>\n      <p style=\"margin: 0;\">You may reapply in <strong>3-6 months</strong> after addressing the factors mentioned above. We encourage you to work on improving your business metrics and credit profile.</p>\n    </div>\n    \n    <h3 style=\"color: #2c3e50;\">Alternative Options to Consider:</h3>\n    <ul>\n      <li>Business credit cards for short-term financing</li>\n      <li>SBA microloans (if eligible)</li>\n      <li>Equipment financing or invoice factoring</li>\n      <li>Business line of credit</li>\n    </ul>\n    \n    <p><strong>Application ID:</strong> {{1.application_id}}<br>\n    <strong>Qualification Score:</strong> {{3.qualification_score.total_score}}/100 (Grade {{3.qualification_score.grade}})</p>\n    \n    <p>We appreciate your interest and wish you success in growing your business. If you have any questions about this decision, please contact us at support@yourcompany.com or call (555) 123-4567.</p>\n    \n    <p style=\"margin-top: 30px;\">Best regards,<br>\n    <strong>Underwriting Team</strong></p>\n  </div>\n</body>\n</html>",
+        "attachments": []
+      },
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 300
+        },
+        "restore": {
+          "parameters": {
+            "account": {
+              "label": "My Email Connection"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": 11,
+      "module": "slack:createMessage",
+      "version": 1,
+      "parameters": {
+        "connection": "YOUR_SLACK_CONNECTION_ID"
+      },
+      "mapper": {
+        "channel": "C_REJECTIONS_LOG",
+        "text": "❌ *APPLICATION REJECTED*\n\n*Business:* {{1.business_name}}\n*Contact:* {{1.contact_name}} ({{1.contact_email}})\n*Application ID:* {{1.application_id}}\n\n*📊 Qualification:*\n• Score: {{3.qualification_score.total_score}}/100 (Grade {{3.qualification_score.grade}})\n\n*💼 Business Details:*\n• Monthly Revenue: ${{formatNumber(1.monthly_revenue; 0; ,; .)}}\n• Time in Business: {{1.time_in_business_months}} months\n• Credit Score: {{1.credit_score}}\n• Industry: {{1.industry}}\n\n*🚫 Rejection Reason:*\n{{3.decision.primary_reason}}\n\n{{if(length(3.decision.rejection_reasons) > 0; \"*Specific Factors:*\n\" + join(3.decision.rejection_reasons; \"\n• \"); \"\")}}\n\n*📅 Follow-up:* Schedule reapply reminder in 90 days",
+        "as_user": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 2100,
+          "y": 300
+        },
+        "restore": {
+          "parameters": {
+            "connection": {
+              "label": "My Slack Connection"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "us1.make.com"
+  },
+  "notes": "## MCA Qualification Workflow Blueprint\n\n### Setup Instructions:\n\n1. **Webhook Setup (Module 1):**\n   - Create custom webhook in Make.com\n   - Replace `YOUR_WEBHOOK_ID_HERE`\n   - Test with: POST to webhook with application data\n\n2. **Python Script Execution (Module 2):**\n   - Replace `YOUR_SERVER_URL` with your server endpoint\n   - Server runs: `source venv/bin/activate && python3 mca_qualification.py --revenue {revenue} --time-in-business {months} --credit-score {score} --industry {industry}`\n   - Replace `YOUR_API_TOKEN`\n\n3. **Google Sheets Logger (Module 4):**\n   - Replace `YOUR_GOOGLE_SHEETS_CONNECTION_ID`\n   - Replace `YOUR_SPREADSHEET_ID`\n   - Create sheet named 'MCA Applications'\n   - Headers: Timestamp, Application ID, Business Name, Contact Name, Contact Email, Phone, Monthly Revenue, Time in Business, Credit Score, Industry, Qualification Score, Grade, Decision, Approval Tier, Advance Amount, Factor Rate, Total Repayment, Term Months, Daily Payment, Effective APR, Primary Reason, Full Response\n\n4. **Router (Module 5) - Routes to 2 paths:**\n   - **Path 1 (APPROVED):**\n     - Sends approval email with offer details\n     - Notifies underwriter queue via Slack\n     - Replace `C_UNDERWRITER_QUEUE` with channel ID\n   \n   - **Path 2 (REJECTED):**\n     - Sends rejection email with reasons and recommendations\n     - Logs to rejections Slack channel\n     - Replace `C_REJECTIONS_LOG` with channel ID\n\n5. **Email Configuration:**\n   - Replace `YOUR_EMAIL_CONNECTION_ID`\n   - Customize email templates with your branding\n   - Update contact information (phone, email)\n\n6. **Slack Channels:**\n   Create these channels:\n   - #underwriter-queue (for approved applications)\n   - #rejections-log (for declined applications)\n\n### Form Integration Example:\n\nConnect to Typeform, Google Forms, or your website form:\n\n```javascript\n// Example webhook payload from form\n{\n  \"monthly_revenue\": 75000,\n  \"time_in_business_months\": 18,\n  \"credit_score\": 680,\n  \"industry\": \"E-commerce\",\n  \"business_name\": \"Example LLC\",\n  \"contact_email\": \"owner@example.com\",\n  \"contact_name\": \"John Doe\",\n  \"phone\": \"555-123-4567\",\n  \"application_id\": \"MCA-2025-001\"\n}\n```\n\n### Testing Scenarios:\n\n**Test 1: Premium Approval**\n```json\n{\n  \"monthly_revenue\": 150000,\n  \"time_in_business_months\": 48,\n  \"credit_score\": 750,\n  \"industry\": \"Technology\",\n  \"business_name\": \"Tech Startup Inc\",\n  \"contact_email\": \"test@example.com\",\n  \"contact_name\": \"Test User\",\n  \"application_id\": \"TEST-001\"\n}\n```\nExpected: Approved, Premium tier, ~$450k advance\n\n**Test 2: Rejection**\n```json\n{\n  \"monthly_revenue\": 8000,\n  \"time_in_business_months\": 4,\n  \"credit_score\": 480,\n  \"industry\": \"Restaurant\",\n  \"business_name\": \"New Restaurant\",\n  \"contact_email\": \"test@example.com\",\n  \"contact_name\": \"Test User\",\n  \"application_id\": \"TEST-002\"\n}\n```\nExpected: Rejected, below minimums\n\n### Expected Flow:\n1. Form submission triggers webhook\n2. Python script qualifies application\n3. Decision logged to Google Sheets\n4. Router splits:\n   - APPROVED: Email applicant → Notify underwriters\n   - REJECTED: Email applicant with reasons → Log rejection\n5. All decisions tracked for compliance\n"
+}

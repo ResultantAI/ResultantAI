@@ -1,0 +1,436 @@
+{
+  "name": "Marketing Audit Automation",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": "YOUR_WEBHOOK_ID_HERE",
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "restore": {},
+        "parameters": [
+          {
+            "name": "hook",
+            "type": "hook",
+            "label": "Webhook",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "url",
+            "type": "text",
+            "label": "Company URL",
+            "required": true
+          },
+          {
+            "name": "industry",
+            "type": "text",
+            "label": "Industry",
+            "required": true
+          },
+          {
+            "name": "company_name",
+            "type": "text",
+            "label": "Company Name"
+          },
+          {
+            "name": "requester_email",
+            "type": "email",
+            "label": "Requester Email"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {},
+      "mapper": {
+        "url": "https://YOUR_SERVER_URL/execute-script",
+        "serializeUrl": false,
+        "method": "post",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "name": "Authorization",
+            "value": "Bearer {{YOUR_API_TOKEN}}"
+          }
+        ],
+        "qs": [],
+        "bodyType": "raw",
+        "parseResponse": true,
+        "authUser": "",
+        "authPass": "",
+        "timeout": 300000,
+        "shareCookies": false,
+        "ca": "",
+        "rejectUnauthorized": true,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "gzip": true,
+        "useMtls": false,
+        "contentType": "application/json",
+        "body": "{\n  \"script\": \"marketing_audit.py\",\n  \"args\": {\n    \"url\": \"{{1.url}}\",\n    \"industry\": \"{{1.industry}}\"\n  }\n}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        },
+        "restore": {
+          "expect": {
+            "method": {
+              "label": "POST"
+            },
+            "headers": {
+              "items": [
+                null,
+                null
+              ]
+            },
+            "qs": {},
+            "bodyType": {
+              "label": "Raw"
+            },
+            "contentType": {
+              "label": "JSON (application/json)"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "handleErrors",
+            "type": "boolean",
+            "label": "Evaluate all states as errors (except for 2xx and 3xx )",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "url",
+            "type": "url",
+            "label": "URL",
+            "required": true
+          },
+          {
+            "name": "method",
+            "type": "select",
+            "label": "Method",
+            "required": true,
+            "validate": {
+              "enum": ["get", "post", "put", "patch", "delete", "options"]
+            }
+          },
+          {
+            "name": "headers",
+            "spec": [
+              {
+                "name": "name",
+                "type": "text",
+                "label": "Name"
+              },
+              {
+                "name": "value",
+                "type": "text",
+                "label": "Value"
+              }
+            ],
+            "type": "array",
+            "label": "Headers"
+          },
+          {
+            "name": "bodyType",
+            "type": "select",
+            "label": "Body type"
+          },
+          {
+            "name": "body",
+            "type": "text",
+            "label": "Request content"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{2.data}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        },
+        "restore": {
+          "expect": {
+            "type": {
+              "label": "Choose a data structure"
+            }
+          }
+        },
+        "expect": [
+          {
+            "name": "json",
+            "type": "text",
+            "label": "JSON string",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "module": "slack:createMessage",
+      "version": 1,
+      "parameters": {
+        "connection": "YOUR_SLACK_CONNECTION_ID"
+      },
+      "mapper": {
+        "channel": "C0123456789",
+        "text": "*🎯 Marketing Audit Complete*\n\n*Company:* {{1.company_name}}\n*URL:* {{1.url}}\n*Industry:* {{1.industry}}\n*Overall Score:* {{3.findings.overall_assessment.overall_score}}/10\n\n*📊 Quick Wins:*\n1️⃣ *{{3.findings.quick_wins[1].title}}*\n   Impact: {{3.findings.quick_wins[1].impact}} | Effort: {{3.findings.quick_wins[1].effort}}\n   → {{3.findings.quick_wins[1].description}}\n\n2️⃣ *{{3.findings.quick_wins[2].title}}*\n   Impact: {{3.findings.quick_wins[2].impact}} | Effort: {{3.findings.quick_wins[2].effort}}\n   → {{3.findings.quick_wins[2].description}}\n\n3️⃣ *{{3.findings.quick_wins[3].title}}*\n   Impact: {{3.findings.quick_wins[3].impact}} | Effort: {{3.findings.quick_wins[3].effort}}\n   → {{3.findings.quick_wins[3].description}}\n\n*SEO Score:* {{3.findings.seo_analysis.score}}/10\n*Content Score:* {{3.findings.content_strategy.score}}/10\n*Social Media Score:* {{3.findings.social_media_presence.score}}/10",
+        "attachments": [],
+        "blocks": [],
+        "thread_ts": "",
+        "reply_broadcast": false,
+        "as_user": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "connection": {
+              "label": "My Slack Connection",
+              "data": {
+                "scoped": "true",
+                "connection": "slack"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "connection",
+            "type": "account",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "channel",
+            "type": "select",
+            "label": "Channel",
+            "required": true
+          },
+          {
+            "name": "text",
+            "type": "text",
+            "label": "Text",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "module": "google-sheets:addRow",
+      "version": 2,
+      "parameters": {
+        "connection": "YOUR_GOOGLE_SHEETS_CONNECTION_ID"
+      },
+      "mapper": {
+        "spreadsheetId": "YOUR_SPREADSHEET_ID",
+        "sheetId": "Sheet1",
+        "tableFirstRow": "A1:Z1",
+        "includesHeaders": "true",
+        "values": {
+          "Timestamp": "{{3.audit_metadata.timestamp}}",
+          "Company Name": "{{1.company_name}}",
+          "Company URL": "{{3.audit_metadata.company_url}}",
+          "Industry": "{{3.audit_metadata.industry}}",
+          "Overall Score": "{{3.findings.overall_assessment.overall_score}}",
+          "SEO Score": "{{3.findings.seo_analysis.score}}",
+          "Content Score": "{{3.findings.content_strategy.score}}",
+          "Social Score": "{{3.findings.social_media_presence.score}}",
+          "Quick Win 1": "{{3.findings.quick_wins[1].title}}",
+          "Quick Win 2": "{{3.findings.quick_wins[2].title}}",
+          "Quick Win 3": "{{3.findings.quick_wins[3].title}}",
+          "Strengths": "{{join(3.findings.overall_assessment.strengths; \", \")}}",
+          "Weaknesses": "{{join(3.findings.overall_assessment.weaknesses; \", \")}}",
+          "Requester Email": "{{1.requester_email}}",
+          "Full Report JSON": "{{toString(3)}}"
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 300
+        },
+        "restore": {
+          "parameters": {
+            "connection": {
+              "label": "My Google Sheets Connection",
+              "data": {
+                "scoped": "true",
+                "connection": "google"
+              }
+            }
+          },
+          "expect": {
+            "sheetId": {
+              "mode": "chose",
+              "label": "Sheet1"
+            },
+            "includesHeaders": {
+              "mode": "chose",
+              "label": "Yes"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "connection",
+            "type": "account",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "spreadsheetId",
+            "type": "select",
+            "label": "Spreadsheet",
+            "required": true
+          },
+          {
+            "name": "sheetId",
+            "type": "select",
+            "label": "Sheet",
+            "required": true
+          },
+          {
+            "name": "values",
+            "type": "collection",
+            "label": "Values"
+          }
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {},
+      "mapper": {
+        "url": "https://api.hubapi.com/crm/v3/objects/companies/{{1.company_id}}",
+        "serializeUrl": false,
+        "method": "patch",
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Bearer {{YOUR_HUBSPOT_API_KEY}}"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "qs": [],
+        "bodyType": "raw",
+        "parseResponse": true,
+        "timeout": 300000,
+        "shareCookies": false,
+        "rejectUnauthorized": true,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "gzip": true,
+        "useMtls": false,
+        "contentType": "application/json",
+        "body": "{\n  \"properties\": {\n    \"marketing_audit_completed\": \"true\",\n    \"audit_date\": \"{{3.audit_metadata.timestamp}}\",\n    \"audit_overall_score\": \"{{3.findings.overall_assessment.overall_score}}\",\n    \"audit_seo_score\": \"{{3.findings.seo_analysis.score}}\",\n    \"marketing_audit_tag\": \"audit_completed\"\n  }\n}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 150
+        },
+        "restore": {
+          "expect": {
+            "method": {
+              "label": "PATCH"
+            },
+            "headers": {
+              "items": [
+                null,
+                null
+              ]
+            },
+            "bodyType": {
+              "label": "Raw"
+            },
+            "contentType": {
+              "label": "JSON (application/json)"
+            }
+          }
+        },
+        "parameters": [],
+        "expect": [
+          {
+            "name": "url",
+            "type": "url",
+            "label": "URL",
+            "required": true
+          },
+          {
+            "name": "method",
+            "type": "select",
+            "label": "Method",
+            "required": true
+          },
+          {
+            "name": "body",
+            "type": "text",
+            "label": "Request content"
+          }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "us1.make.com"
+  },
+  "notes": "## Marketing Audit Automation Blueprint\n\n### Setup Instructions:\n\n1. **Webhook Setup (Module 1):**\n   - Create a custom webhook in Make.com\n   - Replace `YOUR_WEBHOOK_ID_HERE` with your webhook ID\n   - Test URL: POST to webhook with `{\"url\": \"https://stripe.com\", \"industry\": \"FinTech\"}`\n\n2. **Python Script Execution (Module 2):**\n   - Replace `YOUR_SERVER_URL` with your server endpoint\n   - Server should run: `source venv/bin/activate && python3 marketing_audit.py --url {url} --industry {industry}`\n   - Replace `YOUR_API_TOKEN` with your authentication token\n\n3. **Slack Notification (Module 4):**\n   - Create Slack connection in Make.com\n   - Replace `YOUR_SLACK_CONNECTION_ID`\n   - Replace `C0123456789` with your Slack channel ID\n\n4. **Google Sheets (Module 5):**\n   - Create Google Sheets connection\n   - Replace `YOUR_GOOGLE_SHEETS_CONNECTION_ID`\n   - Replace `YOUR_SPREADSHEET_ID` with your sheet ID\n   - Create headers: Timestamp, Company Name, Company URL, Industry, Overall Score, SEO Score, Content Score, Social Score, Quick Win 1-3, Strengths, Weaknesses, Requester Email, Full Report JSON\n\n5. **HubSpot CRM Update (Module 6):**\n   - Replace `YOUR_HUBSPOT_API_KEY`\n   - Ensure custom properties exist in HubSpot:\n     - marketing_audit_completed (checkbox)\n     - audit_date (date)\n     - audit_overall_score (number)\n     - audit_seo_score (number)\n     - marketing_audit_tag (single-line text)\n\n### Testing:\nSend POST to webhook:\n```json\n{\n  \"url\": \"https://stripe.com\",\n  \"industry\": \"FinTech\",\n  \"company_name\": \"Stripe\",\n  \"company_id\": \"123456\",\n  \"requester_email\": \"user@example.com\"\n}\n```\n\n### Expected Flow:\n1. Webhook receives company data\n2. HTTP module executes Python script\n3. JSON parser extracts audit results\n4. Slack receives notification with top 3 quick wins\n5. Full report saved to Google Sheets\n6. HubSpot company tagged as 'audit completed'\n"
+}
