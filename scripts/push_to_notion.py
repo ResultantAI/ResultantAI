@@ -11,8 +11,12 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-NOTION_API_KEY = os.getenv('NOTION_API_KEY', 'YOUR_KEY_HERE')
-NOTION_DATABASE_ID = os.getenv('NOTION_DATABASE_ID', 'YOUR_DB_ID_HERE')
+NOTION_API_KEY = os.getenv('NOTION_API_KEY')
+NOTION_DATABASE_ID = os.getenv('NOTION_DATABASE_ID')
+
+# Validate before running
+if not NOTION_API_KEY or not NOTION_DATABASE_ID:
+    raise ValueError("Missing NOTION_API_KEY or NOTION_DATABASE_ID in environment")
 
 def push_to_notion(alert_data):
     """
