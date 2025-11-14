@@ -7,6 +7,10 @@ import os
 import json
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # API configuration from environment
 GOOGLE_ADS_API_KEY = os.getenv('GOOGLE_ADS_API_KEY', '')

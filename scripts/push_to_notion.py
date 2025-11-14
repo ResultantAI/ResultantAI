@@ -3,8 +3,13 @@ Push CPA alerts to Notion Execution_OS as Metrics blocks.
 """
 
 import os
+import sys
 import requests
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 NOTION_API_KEY = os.getenv('NOTION_API_KEY', 'YOUR_KEY_HERE')
 NOTION_DATABASE_ID = os.getenv('NOTION_DATABASE_ID', 'YOUR_DB_ID_HERE')
@@ -59,7 +64,10 @@ def push_to_notion(alert_data):
         if response.status_code == 200:
             print(f"✅ Pushed {row['channel']} alert to Notion")
         else:
-            print(f"❌ Failed to push {row['channel']}: {response.text}")
+            print(f"❌ Failed to push {row['channel']} (status {response.status_code})")
+            print(f"   Response: {response.text}")
+            print(f"   API Key (first 10 chars): {NOTION_API_KEY[:10]}...")
+            print(f"   Database ID: {NOTION_DATABASE_ID}")
 
 if __name__ == '__main__':
     from fetch_spend_data import fetch_spend_data
