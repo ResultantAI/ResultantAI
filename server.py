@@ -8,6 +8,7 @@ Endpoints:
     POST /audit      - Run marketing_audit.py
     POST /enrich     - Run lead_enrichment.py
     POST /qualify    - Run mca_qualification.py
+    POST /spend      - Run ad_spend_data.py
     GET  /health     - Health check
 
 Usage:
@@ -189,7 +190,8 @@ def health_check():
         'scripts_available': {
             'marketing_audit': os.path.exists(os.path.join(SCRIPT_DIR, 'marketing_audit.py')),
             'lead_enrichment': os.path.exists(os.path.join(SCRIPT_DIR, 'lead_enrichment.py')),
-            'mca_qualification': os.path.exists(os.path.join(SCRIPT_DIR, 'mca_qualification.py'))
+            'mca_qualification': os.path.exists(os.path.join(SCRIPT_DIR, 'mca_qualification.py')),
+            'ad_spend_data': os.path.exists(os.path.join(SCRIPT_DIR, 'ad_spend_data.py'))
         }
     }), 200
 
@@ -291,6 +293,30 @@ def qualify():
     return jsonify(result), status_code
 
 
+@app.route('/spend', methods=['POST'])
+def spend():
+    """
+    Fetch ad spend data from Google Sheets or mock data.
+
+    Expected JSON:
+    {
+        "source": "mock" (optional, default: "mock")
+    }
+    """
+    # Validate request
+    data, status, is_valid = validate_json_request()
+    if not is_valid:
+        return jsonify(data), status
+
+    # All fields are optional, default to mock data
+    if not data:
+        data = {'source': 'mock'}
+
+    # Run script
+    result, status_code = run_python_script('ad_spend_data.py', data, timeout=30)
+    return jsonify(result), status_code
+
+
 @app.route('/', methods=['GET'])
 def index():
     """API documentation endpoint."""
@@ -301,7 +327,8 @@ def index():
             'GET /health': 'Health check',
             'POST /audit': 'Run marketing audit (requires: url, industry)',
             'POST /enrich': 'Enrich company data (requires: domain)',
-            'POST /qualify': 'Qualify MCA application (requires: company_name, annual_revenue, credit_score, business_age_months)'
+            'POST /qualify': 'Qualify MCA application (requires: company_name, annual_revenue, credit_score, business_age_months)',
+            'POST /spend': 'Fetch ad spend data (optional: source)'
         },
         'documentation': {
             'audit': {
@@ -338,6 +365,16 @@ def index():
                     'business_age_months': 24,
                     'industry': 'Retail'
                 }
+            },
+            'spend': {
+                'method': 'POST',
+                'endpoint': '/spend',
+                'description': 'Fetch daily ad spend data from Google Sheets or mock data',
+                'required_fields': [],
+                'optional_fields': ['source'],
+                'example': {
+                    'source': 'mock'
+                }
             }
         }
     }), 200
@@ -355,7 +392,7 @@ def not_found(error):
         'path': request.path,
         'method': request.method,
         'timestamp': datetime.utcnow().isoformat() + 'Z',
-        'available_endpoints': ['GET /', 'GET /health', 'POST /audit', 'POST /enrich', 'POST /qualify']
+        'available_endpoints': ['GET /', 'GET /health', 'POST /audit', 'POST /enrich', 'POST /qualify', 'POST /spend']
     }), 404
 
 
@@ -393,6 +430,7 @@ if __name__ == '__main__':
     print(f"  POST http://localhost:{PORT}/audit", file=sys.stderr)
     print(f"  POST http://localhost:{PORT}/enrich", file=sys.stderr)
     print(f"  POST http://localhost:{PORT}/qualify", file=sys.stderr)
+    print(f"  POST http://localhost:{PORT}/spend", file=sys.stderr)
     print(f"\nPress Ctrl+C to stop\n", file=sys.stderr)
 
     app.run(
