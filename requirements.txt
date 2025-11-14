@@ -1,4 +1,4 @@
-# Marketing Audit System Dependencies
+# ResultantAI - All Tools Dependencies
 # Install with: pip install -r requirements.txt
 
 # Anthropic Claude API SDK

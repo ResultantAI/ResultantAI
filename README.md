@@ -11,13 +11,14 @@
 
 ## 🎯 What's Inside
 
-This repository contains **three production-ready automation systems** powered by Anthropic's Claude AI:
+This repository contains **four production-ready automation systems** powered by Anthropic's Claude AI:
 
 | Tool | Description | Use Case |
 |------|-------------|----------|
 | **[Lead Enrichment & Scoring](LEAD_ENRICHMENT_README.md)** | AI-powered lead qualification with ICP scoring | Sales automation, CRM enrichment, lead routing |
 | **[Marketing Audit System](MARKETING_AUDIT_README.md)** | Comprehensive marketing analysis engine | Agency audits, SEO analysis, content strategy |
 | **[MCA Qualification](MCA_QUALIFICATION_README.md)** | Business financing qualification assessment | FinTech, lending automation, risk assessment |
+| **[Maryland Bill Tracker](MARYLAND_BILL_TRACKER_README.md)** | AI-powered legislative monitoring and analysis | Government affairs, policy research, advocacy |
 
 Each tool includes:
 - ✅ **CLI & API modes** (works standalone or in automation workflows)
@@ -73,6 +74,12 @@ python marketing_audit.py --url https://example.com --industry "SaaS"
 ```bash
 echo '{"business_name": "Acme Corp", "monthly_revenue": 50000}' | python mca_qualification.py
 # Returns financing qualification assessment and recommendations
+```
+
+**Maryland Bill Tracker:**
+```bash
+python maryland_bill_tracker.py --bill-number HB123
+# Returns bill details, status, and AI-powered impact analysis
 ```
 
 For detailed usage, see each tool's dedicated README.
@@ -138,6 +145,33 @@ For detailed usage, see each tool's dedicated README.
 - Risk assessment workflows
 
 [→ Full Documentation](MCA_QUALIFICATION_README.md) | [→ Make.com Blueprint](make-blueprint-mca-qualification.json)
+
+---
+
+### 4. [Maryland Bill Tracker](MARYLAND_BILL_TRACKER_README.md)
+
+**Track and analyze Maryland state legislation with AI-powered insights.**
+
+- Bill tracking by number, keyword, or subject area
+- Legislative status monitoring (introduced, committee, passed, enacted)
+- AI-powered impact assessment and stakeholder analysis
+- Priority ratings and monitoring recommendations
+- Multi-keyword tracking for comprehensive coverage
+
+**Perfect for:**
+- Government affairs teams
+- Policy researchers and analysts
+- Advocacy organizations
+- Journalists and media
+- Business & industry groups
+
+**Output includes:**
+- Bill details (title, sponsors, status, timeline)
+- Committee assignments and latest actions
+- AI analysis (impact, stakeholders, priority)
+- Legislative recommendations and insights
+
+[→ Full Documentation](MARYLAND_BILL_TRACKER_README.md)
 
 ---
 
@@ -282,6 +316,7 @@ See [Lead Enrichment README](LEAD_ENRICHMENT_README.md) for full configuration o
 | ✅ | **Lead Enrichment v1.0** | Production-ready with ICP scoring |
 | ✅ | **Marketing Audit v1.0** | Comprehensive marketing analysis |
 | ✅ | **MCA Qualification v1.0** | Business financing assessment |
+| ✅ | **Maryland Bill Tracker v1.0** | AI-powered legislative monitoring |
 | ✅ | **Make.com Blueprints** | Pre-built automation scenarios |
 | 🚧 | **Web Dashboard** | UI for reviewing and managing results |
 | 🚧 | **Batch Processing** | Process multiple leads/audits in parallel |
@@ -301,6 +336,7 @@ Want to influence the roadmap? [Open an issue](../../issues) or contribute!
 - **[Lead Enrichment Guide](LEAD_ENRICHMENT_README.md)** - Full setup, usage, and configuration
 - **[Marketing Audit Guide](MARKETING_AUDIT_README.md)** - Installation and examples
 - **[MCA Qualification Guide](MCA_QUALIFICATION_README.md)** - Business assessment docs
+- **[Maryland Bill Tracker Guide](MARYLAND_BILL_TRACKER_README.md)** - Legislative monitoring and analysis
 - **[Make.com Blueprints](MAKE_BLUEPRINTS_README.md)** - Automation scenario guides
 
 ---
