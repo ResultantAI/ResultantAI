@@ -5,11 +5,12 @@ Flask API Server for Make.com Integration
 Production-ready Flask server that exposes Python scripts as REST APIs.
 
 Endpoints:
-    POST /audit      - Run marketing_audit.py
-    POST /enrich     - Run lead_enrichment.py
-    POST /qualify    - Run mca_qualification.py
-    POST /spend      - Run ad_spend_data.py
-    GET  /health     - Health check
+    POST /audit        - Run marketing_audit.py
+    POST /enrich       - Run lead_enrichment.py
+    POST /qualify      - Run mca_qualification.py
+    POST /spend        - Run ad_spend_data.py
+    POST /cpa-analysis - Run calculate_cpa.py
+    GET  /health       - Health check
 
 Usage:
     python server.py
@@ -191,7 +192,8 @@ def health_check():
             'marketing_audit': os.path.exists(os.path.join(SCRIPT_DIR, 'marketing_audit.py')),
             'lead_enrichment': os.path.exists(os.path.join(SCRIPT_DIR, 'lead_enrichment.py')),
             'mca_qualification': os.path.exists(os.path.join(SCRIPT_DIR, 'mca_qualification.py')),
-            'ad_spend_data': os.path.exists(os.path.join(SCRIPT_DIR, 'ad_spend_data.py'))
+            'ad_spend_data': os.path.exists(os.path.join(SCRIPT_DIR, 'ad_spend_data.py')),
+            'calculate_cpa': os.path.exists(os.path.join(SCRIPT_DIR, 'calculate_cpa.py'))
         }
     }), 200
 
@@ -317,6 +319,38 @@ def spend():
     return jsonify(result), status_code
 
 
+@app.route('/cpa-analysis', methods=['POST'])
+def cpa_analysis():
+    """
+    Calculate CPA per channel and flag over-threshold spend.
+
+    Expected JSON:
+    {
+        "source": "mock" (optional, default: "mock"),
+        "thresholds": {
+            "Google": 60,
+            "Reddit": 45,
+            "Upwork": 30
+        } (optional)
+    }
+    """
+    # Validate request
+    data, status, is_valid = validate_json_request()
+    if not is_valid:
+        return jsonify(data), status
+
+    # All fields are optional, use defaults if not provided
+    if not data:
+        data = {
+            'source': 'mock',
+            'thresholds': {'Google': 60, 'Reddit': 45, 'Upwork': 30}
+        }
+
+    # Run script
+    result, status_code = run_python_script('calculate_cpa.py', data, timeout=30)
+    return jsonify(result), status_code
+
+
 @app.route('/', methods=['GET'])
 def index():
     """API documentation endpoint."""
@@ -328,7 +362,8 @@ def index():
             'POST /audit': 'Run marketing audit (requires: url, industry)',
             'POST /enrich': 'Enrich company data (requires: domain)',
             'POST /qualify': 'Qualify MCA application (requires: company_name, annual_revenue, credit_score, business_age_months)',
-            'POST /spend': 'Fetch ad spend data (optional: source)'
+            'POST /spend': 'Fetch ad spend data (optional: source)',
+            'POST /cpa-analysis': 'Calculate CPA and flag over-threshold channels (optional: source, thresholds)'
         },
         'documentation': {
             'audit': {
@@ -375,6 +410,21 @@ def index():
                 'example': {
                     'source': 'mock'
                 }
+            },
+            'cpa_analysis': {
+                'method': 'POST',
+                'endpoint': '/cpa-analysis',
+                'description': 'Calculate CPA per channel and flag over-threshold spend',
+                'required_fields': [],
+                'optional_fields': ['source', 'thresholds'],
+                'example': {
+                    'source': 'mock',
+                    'thresholds': {
+                        'Google': 60,
+                        'Reddit': 45,
+                        'Upwork': 30
+                    }
+                }
             }
         }
     }), 200
@@ -392,7 +442,7 @@ def not_found(error):
         'path': request.path,
         'method': request.method,
         'timestamp': datetime.utcnow().isoformat() + 'Z',
-        'available_endpoints': ['GET /', 'GET /health', 'POST /audit', 'POST /enrich', 'POST /qualify', 'POST /spend']
+        'available_endpoints': ['GET /', 'GET /health', 'POST /audit', 'POST /enrich', 'POST /qualify', 'POST /spend', 'POST /cpa-analysis']
     }), 404
 
 
@@ -431,6 +481,7 @@ if __name__ == '__main__':
     print(f"  POST http://localhost:{PORT}/enrich", file=sys.stderr)
     print(f"  POST http://localhost:{PORT}/qualify", file=sys.stderr)
     print(f"  POST http://localhost:{PORT}/spend", file=sys.stderr)
+    print(f"  POST http://localhost:{PORT}/cpa-analysis", file=sys.stderr)
     print(f"\nPress Ctrl+C to stop\n", file=sys.stderr)
 
     app.run(
