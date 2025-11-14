@@ -10,6 +10,7 @@ Endpoints:
     POST /qualify      - Run mca_qualification.py
     POST /spend        - Run ad_spend_data.py
     POST /cpa-analysis - Run calculate_cpa.py
+    POST /notion-push  - Run notion_push.py
     GET  /health       - Health check
 
 Usage:
@@ -193,7 +194,8 @@ def health_check():
             'lead_enrichment': os.path.exists(os.path.join(SCRIPT_DIR, 'lead_enrichment.py')),
             'mca_qualification': os.path.exists(os.path.join(SCRIPT_DIR, 'mca_qualification.py')),
             'ad_spend_data': os.path.exists(os.path.join(SCRIPT_DIR, 'ad_spend_data.py')),
-            'calculate_cpa': os.path.exists(os.path.join(SCRIPT_DIR, 'calculate_cpa.py'))
+            'calculate_cpa': os.path.exists(os.path.join(SCRIPT_DIR, 'calculate_cpa.py')),
+            'notion_push': os.path.exists(os.path.join(SCRIPT_DIR, 'notion_push.py'))
         }
     }), 200
 
@@ -351,6 +353,40 @@ def cpa_analysis():
     return jsonify(result), status_code
 
 
+@app.route('/notion-push', methods=['POST'])
+def notion_push():
+    """
+    Push CPA alerts to Notion Execution_OS as Metrics blocks.
+
+    Expected JSON:
+    {
+        "source": "mock" (optional, default: "mock"),
+        "thresholds": {
+            "Google": 60,
+            "Reddit": 45,
+            "Upwork": 30
+        } (optional),
+        "notion_api_key": "your_key" (optional, overrides env var),
+        "notion_database_id": "your_db_id" (optional, overrides env var)
+    }
+    """
+    # Validate request
+    data, status, is_valid = validate_json_request()
+    if not is_valid:
+        return jsonify(data), status
+
+    # All fields are optional, use defaults if not provided
+    if not data:
+        data = {
+            'source': 'mock',
+            'thresholds': {'Google': 60, 'Reddit': 45, 'Upwork': 30}
+        }
+
+    # Run script
+    result, status_code = run_python_script('notion_push.py', data, timeout=60)
+    return jsonify(result), status_code
+
+
 @app.route('/', methods=['GET'])
 def index():
     """API documentation endpoint."""
@@ -363,7 +399,8 @@ def index():
             'POST /enrich': 'Enrich company data (requires: domain)',
             'POST /qualify': 'Qualify MCA application (requires: company_name, annual_revenue, credit_score, business_age_months)',
             'POST /spend': 'Fetch ad spend data (optional: source)',
-            'POST /cpa-analysis': 'Calculate CPA and flag over-threshold channels (optional: source, thresholds)'
+            'POST /cpa-analysis': 'Calculate CPA and flag over-threshold channels (optional: source, thresholds)',
+            'POST /notion-push': 'Push CPA alerts to Notion Execution_OS (optional: source, thresholds, notion_api_key, notion_database_id)'
         },
         'documentation': {
             'audit': {
@@ -425,6 +462,23 @@ def index():
                         'Upwork': 30
                     }
                 }
+            },
+            'notion_push': {
+                'method': 'POST',
+                'endpoint': '/notion-push',
+                'description': 'Push CPA alerts to Notion Execution_OS as Metrics blocks',
+                'required_fields': [],
+                'optional_fields': ['source', 'thresholds', 'notion_api_key', 'notion_database_id'],
+                'example': {
+                    'source': 'mock',
+                    'thresholds': {
+                        'Google': 60,
+                        'Reddit': 45,
+                        'Upwork': 30
+                    },
+                    'notion_api_key': 'ntn_your_key_here',
+                    'notion_database_id': 'your_database_id_here'
+                }
             }
         }
     }), 200
@@ -442,7 +496,7 @@ def not_found(error):
         'path': request.path,
         'method': request.method,
         'timestamp': datetime.utcnow().isoformat() + 'Z',
-        'available_endpoints': ['GET /', 'GET /health', 'POST /audit', 'POST /enrich', 'POST /qualify', 'POST /spend', 'POST /cpa-analysis']
+        'available_endpoints': ['GET /', 'GET /health', 'POST /audit', 'POST /enrich', 'POST /qualify', 'POST /spend', 'POST /cpa-analysis', 'POST /notion-push']
     }), 404
 
 
@@ -482,6 +536,7 @@ if __name__ == '__main__':
     print(f"  POST http://localhost:{PORT}/qualify", file=sys.stderr)
     print(f"  POST http://localhost:{PORT}/spend", file=sys.stderr)
     print(f"  POST http://localhost:{PORT}/cpa-analysis", file=sys.stderr)
+    print(f"  POST http://localhost:{PORT}/notion-push", file=sys.stderr)
     print(f"\nPress Ctrl+C to stop\n", file=sys.stderr)
 
     app.run(
