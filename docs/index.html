@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Marketing agencies leak $200K-500K/year through three invisible holes. We find and recover the revenue you're losing right now.">
+    <title>ResultantAI - Revenue Recovery System for Marketing Agencies</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./css/style.css">
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#EF4444',
+                        secondary: '#DC2626',
+                        accent: '#7C3AED',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-primary">
+                        ResultantAI
+                    </span>
+                    <span class="ml-3 text-sm text-gray-600 hidden md:block">Revenue Recovery System</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#problem" class="text-gray-700 hover:text-primary transition">The Problem</a>
+                    <a href="#solution" class="text-gray-700 hover:text-primary transition">The Solution</a>
+                    <a href="#calculator" class="text-gray-700 hover:text-primary transition">Calculate Your Loss</a>
+                    <a href="#demos" class="text-gray-700 hover:text-primary transition">Live Demos</a>
+                    <a href="#calculator" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition transform hover:scale-105">
+                        Find Your Leaks
+                    </a>
+                </div>
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" class="text-gray-700 hover:text-primary">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="#problem" class="block px-3 py-2 text-gray-700 hover:text-primary">The Problem</a>
+                <a href="#solution" class="block px-3 py-2 text-gray-700 hover:text-primary">The Solution</a>
+                <a href="#calculator" class="block px-3 py-2 text-gray-700 hover:text-primary">Calculate Your Loss</a>
+                <a href="#demos" class="block px-3 py-2 text-gray-700 hover:text-primary">Live Demos</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-4 bg-gradient-to-br from-red-600 via-red-700 to-purple-900 text-white">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="inline-block bg-red-500 bg-opacity-30 px-4 py-2 rounded-full mb-6 animate-pulse">
+                <span class="text-sm font-semibold">⚠️ Your agency is bleeding revenue right now</span>
+            </div>
+
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 animate-fade-in">
+                Stop Losing $200K-500K/Year
+            </h1>
+            <p class="text-xl md:text-2xl mb-4 text-gray-200 max-w-4xl mx-auto leading-relaxed">
+                Marketing agencies leak revenue through <span class="font-bold text-yellow-300">three invisible holes</span>.
+                We plug all three and recover the money you're losing right now.
+            </p>
+            <p class="text-lg mb-8 text-red-200 max-w-2xl mx-auto">
+                Every day you wait = more money down the drain.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                <a href="#calculator" class="bg-white text-red-600 px-8 py-4 rounded-lg font-bold text-lg hover:shadow-2xl transform hover:-translate-y-1 transition">
+                    Calculate My Revenue Loss <i class="fas fa-calculator ml-2"></i>
+                </a>
+                <a href="#solution" class="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-red-600 transition">
+                    Show Me The Solution
+                </a>
+            </div>
+
+            <!-- Social Proof -->
+            <div class="flex flex-col md:flex-row items-center justify-center gap-6 text-sm">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                    <span>Recover revenue in 30-60 days</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                    <span>No long-term contracts</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                    <span>ROI guaranteed or money back</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Problem Section -->
+    <section id="problem" class="py-20 px-4 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">The Three Revenue Leaks</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Most agencies don't realize they're hemorrhaging revenue. Here are the three holes draining your profits:
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Leak 1: Missed Calls -->
+                <div class="bg-gradient-to-br from-red-50 to-orange-50 p-8 rounded-xl border-2 border-red-200 hover:border-red-400 transition hover:shadow-xl transform hover:-translate-y-2">
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                            <i class="fas fa-phone-slash text-white text-3xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">Revenue Leak #1</h3>
+                        <p class="text-lg font-semibold text-red-600">Missed Calls = Lost Deals</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg mb-4">
+                        <div class="text-4xl font-bold text-red-600 mb-2">$80K-150K/year</div>
+                        <p class="text-sm text-gray-600">Average revenue lost from unanswered leads</p>
+                    </div>
+
+                    <ul class="space-y-3 text-sm">
+                        <li class="flex items-start">
+                            <i class="fas fa-times-circle text-red-500 mr-2 mt-1"></i>
+                            <span>30-40% of inbound leads call during off-hours</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-times-circle text-red-500 mr-2 mt-1"></i>
+                            <span>78% won't leave voicemail (they call your competitor)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-times-circle text-red-500 mr-2 mt-1"></i>
+                            <span>Each missed call = $2K-5K potential deal gone forever</span>
+                        </li>
+                    </ul>
+
+                    <div class="mt-6 pt-6 border-t">
+                        <p class="font-bold text-red-600 mb-2">The Fix:</p>
+                        <p class="text-sm">AI Call Answering captures every lead 24/7, qualifies them, and books meetings instantly.</p>
+                    </div>
+                </div>
+
+                <!-- Leak 2: Unqualified Prospects -->
+                <div class="bg-gradient-to-br from-orange-50 to-yellow-50 p-8 rounded-xl border-2 border-orange-200 hover:border-orange-400 transition hover:shadow-xl transform hover:-translate-y-2">
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                            <i class="fas fa-user-times text-white text-3xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">Revenue Leak #2</h3>
+                        <p class="text-lg font-semibold text-orange-600">Wasted Time on Bad Fits</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg mb-4">
+                        <div class="text-4xl font-bold text-orange-600 mb-2">$60K-120K/year</div>
+                        <p class="text-sm text-gray-600">Cost of chasing unqualified prospects</p>
+                    </div>
+
+                    <ul class="space-y-3 text-sm">
+                        <li class="flex items-start">
+                            <i class="fas fa-times-circle text-orange-500 mr-2 mt-1"></i>
+                            <span>Sales team wastes 40% of time on poor-fit prospects</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-times-circle text-orange-500 mr-2 mt-1"></i>
+                            <span>Free audits given to tire-kickers who'll never buy</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-times-circle text-orange-500 mr-2 mt-1"></i>
+                            <span>Opportunity cost: time not spent on hot leads</span>
+                        </li>
+                    </ul>
+
+                    <div class="mt-6 pt-6 border-t">
+                        <p class="font-bold text-orange-600 mb-2">The Fix:</p>
+                        <p class="text-sm">AI Audit System pre-qualifies prospects with instant analysis, filtering out bad fits before they waste your time.</p>
+                    </div>
+                </div>
+
+                <!-- Leak 3: Dead Pipelines -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-8 rounded-xl border-2 border-purple-200 hover:border-purple-400 transition hover:shadow-xl transform hover:-translate-y-2">
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                            <i class="fas fa-chart-line-down text-white text-3xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">Revenue Leak #3</h3>
+                        <p class="text-lg font-semibold text-purple-600">Leads That Go Cold</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg mb-4">
+                        <div class="text-4xl font-bold text-purple-600 mb-2">$90K-200K/year</div>
+                        <p class="text-sm text-gray-600">Revenue lost from lack of follow-up</p>
+                    </div>
+
+                    <ul class="space-y-3 text-sm">
+                        <li class="flex items-start">
+                            <i class="fas fa-times-circle text-purple-500 mr-2 mt-1"></i>
+                            <span>60% of deals need 5+ touchpoints to close</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-times-circle text-purple-500 mr-2 mt-1"></i>
+                            <span>Your team gives up after 2-3 attempts (if that)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-times-circle text-purple-500 mr-2 mt-1"></i>
+                            <span>"Warm" leads go cold while you're busy with other clients</span>
+                        </li>
+                    </ul>
+
+                    <div class="mt-6 pt-6 border-t">
+                        <p class="font-bold text-purple-600 mb-2">The Fix:</p>
+                        <p class="text-sm">AI Follow-Up System nurtures every lead with personalized sequences until they're ready to buy.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Loss Calculator -->
+            <div class="mt-16 bg-gradient-to-r from-red-600 to-purple-900 text-white p-12 rounded-2xl text-center">
+                <h3 class="text-3xl md:text-4xl font-bold mb-4">Total Revenue Leaking:</h3>
+                <div class="text-6xl md:text-7xl font-bold mb-6">
+                    $230K - $470K<span class="text-4xl">/year</span>
+                </div>
+                <p class="text-xl mb-8 max-w-2xl mx-auto">
+                    This is the average amount agencies lose each year from these three holes alone.
+                    <span class="font-bold text-yellow-300">How much are YOU losing?</span>
+                </p>
+                <a href="#calculator" class="inline-block bg-white text-red-600 px-8 py-4 rounded-lg font-bold text-lg hover:shadow-2xl transform hover:-translate-y-1 transition">
+                    Calculate My Exact Loss <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Solution Section -->
+    <section id="solution" class="py-20 px-4 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">The Revenue Recovery System</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Three AI-powered systems that plug your revenue leaks and recover the money you're losing right now.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 mb-12">
+                <!-- System 1 -->
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <div class="w-16 h-16 bg-red-500 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-phone-volume text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">24/7 AI Call Capture</h3>
+                    <p class="text-gray-600 mb-4">Never miss a lead again. AI answers every call, qualifies prospects, and books meetings - even at 2am on Sunday.</p>
+                    <div class="bg-red-50 p-4 rounded-lg mb-4">
+                        <p class="font-bold text-red-600 text-lg">Recovers: $80K-150K/year</p>
+                    </div>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i><span>Answers in 2 rings, 24/7/365</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i><span>Qualifies with custom questions</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i><span>Books in your calendar instantly</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i><span>Sends you qualified lead details</span></li>
+                    </ul>
+                </div>
+
+                <!-- System 2 -->
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <div class="w-16 h-16 bg-orange-500 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-clipboard-check text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">AI Audit Engine</h3>
+                    <p class="text-gray-600 mb-4">Pre-qualify prospects instantly with AI-powered audits. Only spend time on real opportunities.</p>
+                    <div class="bg-orange-50 p-4 rounded-lg mb-4">
+                        <p class="font-bold text-orange-600 text-lg">Recovers: $60K-120K/year</p>
+                    </div>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i><span>Instant SEO, content, & tech audits</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i><span>Automated lead scoring (0-100)</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i><span>Filters bad fits before first call</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i><span>Creates personalized proposals</span></li>
+                    </ul>
+                </div>
+
+                <!-- System 3 -->
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <div class="w-16 h-16 bg-purple-500 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-robot text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">AI Follow-Up Automation</h3>
+                    <p class="text-gray-600 mb-4">Stop letting warm leads go cold. AI nurtures every prospect with perfect timing until they're ready to buy.</p>
+                    <div class="bg-purple-50 p-4 rounded-lg mb-4">
+                        <p class="font-bold text-purple-600 text-lg">Recovers: $90K-200K/year</p>
+                    </div>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i><span>Personalized 5-10 touch sequences</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i><span>Email, SMS, calls - all automated</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i><span>Detects buying signals automatically</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i><span>Alerts you when lead is hot</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ROI Promise -->
+            <div class="bg-white p-12 rounded-2xl shadow-xl text-center border-4 border-green-500">
+                <i class="fas fa-shield-check text-green-500 text-6xl mb-6"></i>
+                <h3 class="text-3xl font-bold mb-4">Our ROI Guarantee</h3>
+                <p class="text-xl text-gray-700 mb-6 max-w-3xl mx-auto">
+                    If we don't recover at least <span class="font-bold text-green-600">3X our fee</span> in the first 90 days,
+                    we'll keep working for free until you hit ROI.
+                </p>
+                <p class="text-gray-600">
+                    That's how confident we are that you're bleeding revenue right now.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Revenue Loss Calculator -->
+    <section id="calculator" class="py-20 px-4 bg-white">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">Calculate Your Revenue Loss</h2>
+                <p class="text-xl text-gray-600">
+                    Answer 3 questions to see exactly how much revenue you're losing each year
+                </p>
+            </div>
+
+            <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-8 md:p-12 rounded-2xl border-2 border-gray-300 shadow-xl">
+                <form id="revenue-calculator" class="space-y-6">
+                    <div>
+                        <label class="block text-lg font-bold mb-3">1. How many inbound leads do you get per month?</label>
+                        <input type="number" id="leads-per-month" min="1" value="20" required
+                            class="w-full px-6 py-4 text-2xl rounded-lg border-2 border-gray-300 focus:border-red-500 focus:outline-none transition">
+                        <p class="text-sm text-gray-600 mt-2">Include calls, form fills, and inquiries</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-lg font-bold mb-3">2. What's your average deal value?</label>
+                        <div class="flex items-center">
+                            <span class="text-2xl mr-3">$</span>
+                            <input type="number" id="deal-value" min="100" value="5000" required
+                                class="w-full px-6 py-4 text-2xl rounded-lg border-2 border-gray-300 focus:border-red-500 focus:outline-none transition">
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">Average monthly retainer or project value</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-lg font-bold mb-3">3. What's your current close rate?</label>
+                        <div class="flex items-center">
+                            <input type="number" id="close-rate" min="1" max="100" value="20" required
+                                class="w-full px-6 py-4 text-2xl rounded-lg border-2 border-gray-300 focus:border-red-500 focus:outline-none transition">
+                            <span class="text-2xl ml-3">%</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">Percentage of leads that become clients</p>
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white py-6 rounded-lg font-bold text-xl hover:shadow-2xl transition transform hover:-translate-y-1">
+                        <i class="fas fa-calculator mr-2"></i>Calculate My Revenue Loss
+                    </button>
+                </form>
+
+                <div id="calculator-result" class="hidden mt-12 p-8 bg-white rounded-xl border-4 border-red-500 shadow-2xl">
+                    <!-- Results will be inserted here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Demos Section -->
+    <section id="demos" class="py-20 px-4 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4">Try The Systems Live</h2>
+            <p class="text-center text-gray-600 mb-16 text-lg">See how our AI tools work with real data</p>
+
+            <!-- Demo Tabs -->
+            <div class="demo-tabs flex flex-wrap justify-center gap-4 mb-8">
+                <button onclick="showDemo('enrich')" id="tab-enrich" class="demo-tab active px-6 py-3 rounded-lg font-semibold transition">
+                    <i class="fas fa-user-plus mr-2"></i>Lead Enrichment
+                </button>
+                <button onclick="showDemo('audit')" id="tab-audit" class="demo-tab px-6 py-3 rounded-lg font-semibold transition">
+                    <i class="fas fa-chart-line mr-2"></i>AI Audit
+                </button>
+                <button onclick="showDemo('qualify')" id="tab-qualify" class="demo-tab px-6 py-3 rounded-lg font-semibold transition">
+                    <i class="fas fa-dollar-sign mr-2"></i>Lead Qualification
+                </button>
+            </div>
+
+            <!-- Demo Forms Container -->
+            <div class="max-w-4xl mx-auto">
+                <!-- Lead Enrichment Demo -->
+                <div id="demo-enrich" class="demo-content">
+                    <div class="bg-gradient-to-br from-orange-50 to-red-50 p-8 rounded-xl border-2 border-primary">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <i class="fas fa-user-plus text-primary mr-3"></i>
+                            Lead Enrichment & ICP Scoring
+                        </h3>
+                        <p class="text-gray-600 mb-6">Enter a company domain to get comprehensive intelligence and ICP scoring.</p>
+
+                        <form id="form-enrich" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Company Domain *</label>
+                                <input type="text" name="domain" placeholder="stripe.com" required
+                                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-primary focus:outline-none transition">
+                            </div>
+                            <button type="submit" class="w-full bg-gradient-to-r from-primary to-orange-600 text-white py-4 rounded-lg font-semibold hover:shadow-xl transition transform hover:-translate-y-1">
+                                <i class="fas fa-search mr-2"></i>Enrich Lead
+                            </button>
+                        </form>
+
+                        <div id="loading-enrich" class="hidden mt-6 text-center">
+                            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-primary"></div>
+                            <p class="mt-4 text-gray-600">Analyzing with Claude AI...</p>
+                        </div>
+
+                        <div id="result-enrich" class="hidden mt-6"></div>
+                    </div>
+                </div>
+
+                <!-- Marketing Audit Demo -->
+                <div id="demo-audit" class="demo-content hidden">
+                    <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-8 rounded-xl border-2 border-accent">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <i class="fas fa-chart-line text-accent mr-3"></i>
+                            AI Marketing Audit
+                        </h3>
+                        <p class="text-gray-600 mb-6">Generate a comprehensive marketing audit instantly.</p>
+
+                        <form id="form-audit" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Website URL *</label>
+                                <input type="url" name="url" placeholder="https://example.com" required
+                                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-accent focus:outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Industry *</label>
+                                <select name="industry" required
+                                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-accent focus:outline-none transition">
+                                    <option value="">Select Industry</option>
+                                    <option value="SaaS">SaaS</option>
+                                    <option value="E-commerce">E-commerce</option>
+                                    <option value="FinTech">FinTech</option>
+                                    <option value="Healthcare">Healthcare</option>
+                                    <option value="Education">Education</option>
+                                    <option value="Marketing Agency">Marketing Agency</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full bg-gradient-to-r from-accent to-purple-600 text-white py-4 rounded-lg font-semibold hover:shadow-xl transition transform hover:-translate-y-1">
+                                <i class="fas fa-clipboard-check mr-2"></i>Generate Audit
+                            </button>
+                        </form>
+
+                        <div id="loading-audit" class="hidden mt-6 text-center">
+                            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-accent"></div>
+                            <p class="mt-4 text-gray-600">Analyzing with Claude AI...</p>
+                        </div>
+
+                        <div id="result-audit" class="hidden mt-6"></div>
+                    </div>
+                </div>
+
+                <!-- MCA Qualification Demo -->
+                <div id="demo-qualify" class="demo-content hidden">
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-xl border-2 border-secondary">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <i class="fas fa-dollar-sign text-secondary mr-3"></i>
+                            Lead Qualification System
+                        </h3>
+                        <p class="text-gray-600 mb-6">Assess business qualification automatically.</p>
+
+                        <form id="form-qualify" class="space-y-4">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold mb-2">Business Name *</label>
+                                    <input type="text" name="company_name" placeholder="Acme Corp" required
+                                        class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-secondary focus:outline-none transition">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold mb-2">Annual Revenue ($) *</label>
+                                    <input type="number" name="annual_revenue" placeholder="500000" required
+                                        class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-secondary focus:outline-none transition">
+                                </div>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold mb-2">Credit Score *</label>
+                                    <input type="number" name="credit_score" placeholder="650" min="300" max="850" required
+                                        class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-secondary focus:outline-none transition">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold mb-2">Business Age (Months) *</label>
+                                    <input type="number" name="business_age_months" placeholder="24" required
+                                        class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-secondary focus:outline-none transition">
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full bg-gradient-to-r from-secondary to-blue-600 text-white py-4 rounded-lg font-semibold hover:shadow-xl transition transform hover:-translate-y-1">
+                                <i class="fas fa-calculator mr-2"></i>Assess Qualification
+                            </button>
+                        </form>
+
+                        <div id="loading-qualify" class="hidden mt-6 text-center">
+                            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-secondary"></div>
+                            <p class="mt-4 text-gray-600">Analyzing with Claude AI...</p>
+                        </div>
+
+                        <div id="result-qualify" class="hidden mt-6"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 px-4 bg-gradient-to-br from-red-600 via-red-700 to-purple-900 text-white">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6">Stop The Bleeding. Recover Your Revenue.</h2>
+            <p class="text-xl mb-4">Every day you wait = more money lost forever.</p>
+            <p class="text-lg mb-8 text-gray-200">
+                Join agencies who've recovered $200K+ in the first year.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+                <a href="#calculator" class="bg-white text-red-600 px-8 py-4 rounded-lg font-bold text-lg hover:shadow-2xl transform hover:-translate-y-1 transition inline-block">
+                    Calculate My Loss Now
+                </a>
+                <a href="https://github.com/ResultantAI/ResultantAI" target="_blank"
+                   class="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-red-600 transition inline-block">
+                    <i class="fab fa-github mr-2"></i>View on GitHub
+                </a>
+            </div>
+            <p class="text-sm text-gray-300">
+                <i class="fas fa-shield-check mr-2"></i>
+                90-day ROI guarantee | No long-term contracts | Open-source & transparent
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-12 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h4 class="text-white font-bold text-lg mb-4">ResultantAI</h4>
+                    <p class="text-sm">Revenue Recovery System for Marketing Agencies</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4">Solutions</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#solution" class="hover:text-primary transition">24/7 Call Capture</a></li>
+                        <li><a href="#solution" class="hover:text-primary transition">AI Audit Engine</a></li>
+                        <li><a href="#solution" class="hover:text-primary transition">Follow-Up Automation</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4">Resources</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="https://github.com/ResultantAI/ResultantAI" target="_blank" class="hover:text-primary transition">GitHub</a></li>
+                        <li><a href="https://github.com/ResultantAI/ResultantAI/blob/main/README.md" target="_blank" class="hover:text-primary transition">Documentation</a></li>
+                        <li><a href="#calculator" class="hover:text-primary transition">Revenue Calculator</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4">Connect</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="https://github.com/ResultantAI" target="_blank" class="hover:text-primary transition"><i class="fab fa-github mr-2"></i>GitHub</a></li>
+                        <li><a href="mailto:support@resultantai.com" class="hover:text-primary transition"><i class="fas fa-envelope mr-2"></i>Email</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 pt-8 text-center text-sm">
+                <p>Built with Claude AI | Open Source | MIT Licensed</p>
+                <p class="mt-2 text-gray-500">Stop losing revenue. Start recovering it.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="./js/main.js"></script>
+</body>
+</html>
