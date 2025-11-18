@@ -24,14 +24,14 @@ import subprocess
 from datetime import datetime
 from typing import Dict, Any, Tuple
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory, send_file
 from flask_cors import CORS
 
 # ============================================================================
 # FLASK APP CONFIGURATION
 # ============================================================================
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 # Enable CORS for Make.com and other external services
 CORS(app, resources={
@@ -293,12 +293,22 @@ def qualify():
 
 @app.route('/', methods=['GET'])
 def index():
+    """Serve the main website."""
+    return send_from_directory('static', 'index.html')
+
+
+@app.route('/api', methods=['GET'])
+@app.route('/api/docs', methods=['GET'])
+def api_docs():
     """API documentation endpoint."""
     return jsonify({
         'service': 'Resultant AI API Server',
         'version': '1.0.0',
+        'website': request.host_url,
         'endpoints': {
+            'GET /': 'Main website',
             'GET /health': 'Health check',
+            'GET /api/docs': 'API documentation (this page)',
             'POST /audit': 'Run marketing audit (requires: url, industry)',
             'POST /enrich': 'Enrich company data (requires: domain)',
             'POST /qualify': 'Qualify MCA application (requires: company_name, annual_revenue, credit_score, business_age_months)'
@@ -350,13 +360,17 @@ def index():
 @app.errorhandler(404)
 def not_found(error):
     """Handle 404 errors."""
-    return jsonify({
-        'error': 'Endpoint not found',
-        'path': request.path,
-        'method': request.method,
-        'timestamp': datetime.utcnow().isoformat() + 'Z',
-        'available_endpoints': ['GET /', 'GET /health', 'POST /audit', 'POST /enrich', 'POST /qualify']
-    }), 404
+    # If the request accepts JSON, return JSON error
+    if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+        return jsonify({
+            'error': 'Endpoint not found',
+            'path': request.path,
+            'method': request.method,
+            'timestamp': datetime.utcnow().isoformat() + 'Z',
+            'available_endpoints': ['GET /', 'GET /health', 'GET /api/docs', 'POST /audit', 'POST /enrich', 'POST /qualify']
+        }), 404
+    # Otherwise, redirect to home page
+    return send_from_directory('static', 'index.html'), 404
 
 
 @app.errorhandler(405)
@@ -385,13 +399,17 @@ def internal_error(error):
 # ============================================================================
 
 if __name__ == '__main__':
-    print(f"Starting Resultant AI API Server on port {PORT}...", file=sys.stderr)
+    print(f"Starting ResultantAI Server on port {PORT}...", file=sys.stderr)
     print(f"Using Python: {PYTHON_CMD}", file=sys.stderr)
     print(f"Script directory: {SCRIPT_DIR}", file=sys.stderr)
-    print(f"\nAvailable endpoints:", file=sys.stderr)
+    print(f"\n{'='*60}", file=sys.stderr)
+    print(f"🌐 Website:       http://localhost:{PORT}/", file=sys.stderr)
+    print(f"📚 API Docs:      http://localhost:{PORT}/api/docs", file=sys.stderr)
+    print(f"{'='*60}", file=sys.stderr)
+    print(f"\nAPI Endpoints:", file=sys.stderr)
     print(f"  GET  http://localhost:{PORT}/health", file=sys.stderr)
-    print(f"  POST http://localhost:{PORT}/audit", file=sys.stderr)
     print(f"  POST http://localhost:{PORT}/enrich", file=sys.stderr)
+    print(f"  POST http://localhost:{PORT}/audit", file=sys.stderr)
     print(f"  POST http://localhost:{PORT}/qualify", file=sys.stderr)
     print(f"\nPress Ctrl+C to stop\n", file=sys.stderr)
 
