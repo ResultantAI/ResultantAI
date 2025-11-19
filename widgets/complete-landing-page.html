@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stop Bleeding Revenue | Free AI-Powered Audit</title>
+    <meta name="description" content="Discover exactly how much revenue you're losing and get a personalized plan to fix it in 90 days.">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #ffffff;
+            color: #1a202c;
+            line-height: 1.6;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        .hero .highlight {
+            color: #fbbf24;
+            text-decoration: underline;
+            text-decoration-thickness: 4px;
+            text-underline-offset: 8px;
+        }
+
+        .hero p {
+            font-size: 24px;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            opacity: 0.95;
+            line-height: 1.4;
+        }
+
+        .hero-cta {
+            display: inline-block;
+            padding: 18px 40px;
+            background: white;
+            color: #667eea;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .hero-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Problem Section */
+        .problem {
+            padding: 80px 20px;
+            background: #f8fafc;
+            text-align: center;
+        }
+
+        .problem h2 {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: #1a202c;
+        }
+
+        .problem p {
+            font-size: 20px;
+            color: #4a5568;
+            max-width: 800px;
+            margin: 0 auto 60px;
+        }
+
+        .pain-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .pain-point {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            text-align: left;
+        }
+
+        .pain-point .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .pain-point h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #1a202c;
+        }
+
+        .pain-point p {
+            font-size: 16px;
+            color: #718096;
+            margin: 0;
+        }
+
+        /* Calculator Section */
+        .calculator-section {
+            padding: 80px 20px;
+            background: linear-gradient(to bottom, #ffffff, #f8fafc);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            color: #1a202c;
+        }
+
+        .section-header p {
+            font-size: 20px;
+            color: #4a5568;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .calculator-embed {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Social Proof */
+        .social-proof {
+            padding: 60px 20px;
+            background: #667eea;
+            color: white;
+            text-align: center;
+        }
+
+        .social-proof h3 {
+            font-size: 36px;
+            margin-bottom: 40px;
+            font-weight: 800;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+            flex-wrap: wrap;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 56px;
+            font-weight: 800;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 80px 20px;
+            background: white;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 60px auto 0;
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .step h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #1a202c;
+        }
+
+        .step p {
+            font-size: 16px;
+            color: #718096;
+        }
+
+        /* Guarantee */
+        .guarantee {
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            text-align: center;
+        }
+
+        .guarantee h3 {
+            font-size: 36px;
+            font-weight: 800;
+            color: #78350f;
+            margin-bottom: 15px;
+        }
+
+        .guarantee p {
+            font-size: 20px;
+            color: #92400e;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* FAQ */
+        .faq {
+            padding: 80px 20px;
+            background: #f8fafc;
+        }
+
+        .faq-list {
+            max-width: 800px;
+            margin: 60px auto 0;
+        }
+
+        .faq-item {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .faq-item h4 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 10px;
+        }
+
+        .faq-item p {
+            font-size: 16px;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        /* Final CTA */
+        .final-cta {
+            padding: 80px 20px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .final-cta h2 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .final-cta p {
+            font-size: 22px;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .final-cta-button {
+            display: inline-block;
+            padding: 20px 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            font-size: 22px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .final-cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+            .hero p {
+                font-size: 18px;
+            }
+            .section-header h2 {
+                font-size: 32px;
+            }
+            .stats {
+                gap: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>You're Bleeding <span class="highlight">$100K+ Per Year</span> in Revenue</h1>
+        <p>Most businesses leave 6-7 figures on the table every year. Find out exactly how much in 60 seconds.</p>
+        <a href="#calculator" class="hero-cta">Calculate My Revenue Leak →</a>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="problem">
+        <h2>Sound Familiar?</h2>
+        <p>You're getting leads, but something's not working...</p>
+
+        <div class="pain-points">
+            <div class="pain-point">
+                <div class="icon">😰</div>
+                <h3>Low Close Rates</h3>
+                <p>You're closing 5-15% when you should be at 25-40%. That's money walking out the door.</p>
+            </div>
+
+            <div class="pain-point">
+                <div class="icon">🕳️</div>
+                <h3>Leaky Sales Process</h3>
+                <p>Leads are falling through the cracks. No follow-up system, no nurture sequence, no second chances.</p>
+            </div>
+
+            <div class="pain-point">
+                <div class="icon">🎯</div>
+                <h3>Wrong Leads</h3>
+                <p>You're talking to everyone instead of your ideal customers. Wasting time on tire-kickers.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calculator Section -->
+    <section class="calculator-section" id="calculator">
+        <div class="section-header">
+            <h2>Calculate Your Revenue Leak</h2>
+            <p>Enter your numbers below to see exactly how much you're leaving on the table</p>
+        </div>
+
+        <div class="calculator-embed">
+            <!-- EMBED YOUR SMART CALCULATOR HERE -->
+            <iframe
+                src="smart-revenue-calculator.html"
+                width="100%"
+                height="900"
+                frameborder="0"
+                style="border: none; border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);">
+            </iframe>
+        </div>
+    </section>
+
+    <!-- Social Proof -->
+    <section class="social-proof">
+        <h3>Trusted by Growing Businesses</h3>
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-number">500+</span>
+                <span class="stat-label">Businesses Analyzed</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">$12M+</span>
+                <span class="stat-label">Revenue Recovered</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">35%</span>
+                <span class="stat-label">Average Close Rate Increase</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="section-header">
+            <h2>How It Works</h2>
+            <p>From calculator to cash in 3 simple steps</p>
+        </div>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Calculate Your Leak</h3>
+                <p>Enter your numbers and instantly see how much revenue you're losing each year</p>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Book Your Free Audit</h3>
+                <p>We'll analyze your entire sales process and identify exactly where you're bleeding money</p>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Get Your Action Plan</h3>
+                <p>Walk away with a step-by-step roadmap to capture that lost revenue in 90 days</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Guarantee -->
+    <section class="guarantee">
+        <h3>🎯 Our Iron-Clad Guarantee</h3>
+        <p>If we don't find at least 3X the revenue leak you calculated, the audit is completely free. No questions asked.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq">
+        <div class="section-header">
+            <h2>Frequently Asked Questions</h2>
+        </div>
+
+        <div class="faq-list">
+            <div class="faq-item">
+                <h4>How accurate is the calculator?</h4>
+                <p>The calculator uses conservative estimates (12.5% improvement). In reality, most clients see 25-40% close rate improvements, meaning your actual opportunity is likely 2-3X larger.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>What happens on the audit call?</h4>
+                <p>We'll walk through your current sales process, identify bottlenecks, and show you exactly where leads are falling through. You'll leave with a prioritized action plan.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>Is this really free?</h4>
+                <p>Yes, 100% free. No credit card required, no strings attached. We only work with clients who are a good fit, so the audit helps both of us.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>How long does it take to see results?</h4>
+                <p>Most clients see measurable improvements within 30 days, and significant revenue increases within 90 days. The exact timeline depends on your current setup.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>What if I'm already working with someone?</h4>
+                <p>No problem! The audit is valuable regardless. We'll show you what's working, what's not, and how to optimize your current setup.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta">
+        <h2>Stop Leaving Money on the Table</h2>
+        <p>Every day you wait is another day of lost revenue. Calculate your leak now.</p>
+        <a href="#calculator" class="final-cta-button">Calculate My Revenue Leak →</a>
+    </section>
+
+    <!-- Optional: Add smooth scroll -->
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

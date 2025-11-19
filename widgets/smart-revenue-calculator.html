@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Revenue Calculator | ResultantAI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calculator-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        h1 {
+            color: #1a202c;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="url"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f7fafc;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        .slider-container {
+            margin-top: 10px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-container {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin: 30px 0;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .result-container.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .result-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .result-amount {
+            color: white;
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-message {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 10px;
+        }
+
+        .tier-vip {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #78350f;
+        }
+
+        .tier-standard {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+            color: white;
+        }
+
+        .tier-discovery {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .button-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            margin-top: 10px;
+        }
+
+        .button-secondary:hover {
+            background: #f7fafc;
+        }
+
+        .cta-container {
+            margin-top: 20px;
+        }
+
+        .booking-message {
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .booking-message h3 {
+            color: #065f46;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .booking-message p {
+            color: #047857;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .guarantee {
+            background: #fef3c7;
+            border: 2px solid #fbbf24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .guarantee-text {
+            color: #78350f;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .calculator-container {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .result-amount {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- STEP 1: Calculator Inputs -->
+        <div class="step active" id="step1">
+            <h1>💰 Revenue Leak Calculator</h1>
+            <p class="subtitle">Discover how much revenue you're leaving on the table</p>
+
+            <div class="input-group">
+                <label for="leads">How many leads do you get per month?</label>
+                <div class="input-wrapper">
+                    <input type="number" id="leads" min="0" placeholder="e.g., 100" value="100">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="dealSize">What's your average deal size?</label>
+                <div class="input-wrapper">
+                    <input type="number" id="dealSize" min="0" placeholder="e.g., 5000" value="5000">
+                    <span class="input-suffix">$</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="closeRate">What's your current close rate?</label>
+                <div class="input-wrapper">
+                    <input type="number" id="closeRate" min="0" max="100" step="0.1" placeholder="e.g., 10" value="10">
+                    <span class="input-suffix">%</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="closeRateSlider" min="0" max="100" step="0.1" value="10">
+                </div>
+            </div>
+
+            <button class="button" onclick="goToStep(2)">Calculate My Revenue Leak →</button>
+        </div>
+
+        <!-- STEP 2: Results + Lead Capture -->
+        <div class="step" id="step2">
+            <h1>🚨 Your Revenue Leak Analysis</h1>
+            <p class="subtitle">Here's what the data shows</p>
+
+            <div class="result-container show" id="resultContainer">
+                <div class="result-label">You're Bleeding</div>
+                <div class="result-amount" id="resultAmount">$0</div>
+                <div class="result-message" id="resultMessage">per year in lost revenue</div>
+                <div class="tier-badge" id="tierBadge"></div>
+            </div>
+
+            <div class="booking-message" id="bookingMessage">
+                <h3 id="bookingHeading"></h3>
+                <p id="bookingSubheading"></p>
+            </div>
+
+            <div class="input-group">
+                <label for="name">Your name</label>
+                <input type="text" id="name" placeholder="John Smith" required>
+            </div>
+
+            <div class="input-group">
+                <label for="email">Your email</label>
+                <input type="email" id="email" placeholder="john@company.com" required>
+            </div>
+
+            <div class="input-group">
+                <label for="company">Company name (optional)</label>
+                <input type="text" id="company" placeholder="Acme Inc">
+            </div>
+
+            <div class="input-group">
+                <label for="website">Website (optional)</label>
+                <input type="url" id="website" placeholder="https://example.com">
+            </div>
+
+            <button class="button" onclick="bookCall()" id="bookButton">
+                <span id="buttonText">Book Free Audit Now</span>
+            </button>
+
+            <div class="guarantee" id="guaranteeBox">
+                <div class="guarantee-text" id="guaranteeText"></div>
+            </div>
+
+            <button class="button button-secondary" onclick="goToStep(1)">← Back to Calculator</button>
+        </div>
+    </div>
+
+    <script src="smart-booking-config.js"></script>
+    <script>
+        // State management
+        let currentStep = 1;
+        let leadData = {};
+        let calculatedLeak = 0;
+        let selectedTier = null;
+
+        // Sync slider with input
+        document.getElementById('closeRate').addEventListener('input', (e) => {
+            document.getElementById('closeRateSlider').value = e.target.value;
+        });
+
+        document.getElementById('closeRateSlider').addEventListener('input', (e) => {
+            document.getElementById('closeRate').value = e.target.value;
+        });
+
+        // Step navigation
+        function goToStep(step) {
+            // Validate step 1 before proceeding
+            if (step === 2) {
+                const leads = parseFloat(document.getElementById('leads').value) || 0;
+                const dealSize = parseFloat(document.getElementById('dealSize').value) || 0;
+                const closeRate = parseFloat(document.getElementById('closeRate').value) || 0;
+
+                if (leads <= 0 || dealSize <= 0 || closeRate <= 0) {
+                    alert('Please fill in all calculator fields');
+                    return;
+                }
+
+                // Calculate and show results
+                calculateAndRoute();
+            }
+
+            currentStep = step;
+            updateProgress();
+
+            // Show/hide steps
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById(`step${step}`).classList.add('active');
+        }
+
+        function updateProgress() {
+            const progress = (currentStep / 2) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function calculateAndRoute() {
+            // Get calculator data
+            const leads = parseFloat(document.getElementById('leads').value) || 0;
+            const dealSize = parseFloat(document.getElementById('dealSize').value) || 0;
+            const closeRate = parseFloat(document.getElementById('closeRate').value) || 0;
+
+            // Calculate revenue leak
+            const currentMonthlyRevenue = leads * (closeRate / 100) * dealSize;
+            const currentAnnualRevenue = currentMonthlyRevenue * 12;
+
+            const improvedCloseRate = Math.min(closeRate * 1.125, 100);
+            const improvedMonthlyRevenue = leads * (improvedCloseRate / 100) * dealSize;
+            const improvedAnnualRevenue = improvedMonthlyRevenue * 12;
+
+            const revenueLeak = improvedAnnualRevenue - currentAnnualRevenue;
+            calculatedLeak = revenueLeak;
+
+            // Store lead data
+            leadData = {
+                monthlyLeads: leads,
+                averageDealSize: dealSize,
+                currentCloseRate: closeRate,
+                revenueLeak: revenueLeak,
+                calculatedAt: new Date().toISOString()
+            };
+
+            // Determine routing tier
+            const routing = SmartBookingConfig.determineRoute(leadData);
+            selectedTier = routing.tier;
+
+            // Display results
+            document.getElementById('resultAmount').textContent = formatCurrency(revenueLeak);
+
+            // Update messaging based on tier
+            const messages = SmartBookingConfig.messages[selectedTier];
+            document.getElementById('bookingHeading').textContent = messages.heading;
+            document.getElementById('bookingSubheading').textContent =
+                messages.subheading.replace('{{leak}}', formatCurrency(revenueLeak));
+            document.getElementById('buttonText').textContent = messages.buttonText;
+            document.getElementById('guaranteeText').textContent =
+                messages.guarantee.replace('{{leak}}', formatCurrency(revenueLeak));
+
+            // Update tier badge
+            const badge = document.getElementById('tierBadge');
+            badge.className = `tier-badge tier-${selectedTier}`;
+            badge.textContent = `${selectedTier.toUpperCase()} PRIORITY`;
+
+            console.log('Routing decision:', routing);
+        }
+
+        async function bookCall() {
+            // Validate required fields
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+
+            if (!name || !email) {
+                alert('Please enter your name and email');
+                return;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+
+            // Collect all lead data
+            leadData.name = name;
+            leadData.email = email;
+            leadData.company = document.getElementById('company').value.trim();
+            leadData.website = document.getElementById('website').value.trim();
+
+            // Show loading state
+            const button = document.getElementById('bookButton');
+            button.disabled = true;
+            button.innerHTML = '⏳ Opening booking page...';
+
+            try {
+                // OPTIONAL: Send to webhook/CRM first
+                await SmartBookingConfig.sendToWebhook(leadData, selectedTier);
+
+                // OPTIONAL: Trigger enrichment (runs async in background)
+                SmartBookingConfig.enrichLead(leadData).catch(err => {
+                    console.log('Background enrichment will continue async');
+                });
+
+                // Build Calendly URL with pre-filled data
+                const calendlyUrl = SmartBookingConfig.buildCalendlyUrl(selectedTier, leadData);
+
+                // Track conversion
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'booking_initiated', {
+                        'event_category': 'Lead',
+                        'event_label': selectedTier,
+                        'value': Math.floor(calculatedLeak)
+                    });
+                }
+
+                // Open Calendly (or redirect)
+                window.open(calendlyUrl, '_blank');
+
+                // Show success message
+                button.innerHTML = '✅ Booking page opened!';
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.innerHTML = '<span id="buttonText">' +
+                        SmartBookingConfig.messages[selectedTier].buttonText + '</span>';
+                }, 3000);
+
+            } catch (error) {
+                console.error('Booking error:', error);
+                alert('Something went wrong. Please try again.');
+                button.disabled = false;
+                button.innerHTML = '<span id="buttonText">' +
+                    SmartBookingConfig.messages[selectedTier].buttonText + '</span>';
+            }
+        }
+
+        function formatCurrency(amount) {
+            if (amount >= 1000000) {
+                return '$' + (amount / 1000000).toFixed(2) + 'M';
+            } else if (amount >= 1000) {
+                return '$' + (amount / 1000).toFixed(0) + 'K';
+            } else {
+                return '$' + amount.toFixed(0);
+            }
+        }
+
+        // Initialize
+        updateProgress();
+    </script>
+</body>
+</html>

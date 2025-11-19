@@ -1,0 +1,307 @@
+{
+  "name": "Smart Calendly Lead Capture & Enrichment",
+  "description": "Automatically capture, enrich, and route leads from the Revenue Calculator to your CRM with intelligent tier-based handling",
+  "version": "1.0.0",
+  "flow": [
+    {
+      "id": 1,
+      "module": "webhook:CustomWebHook",
+      "name": "Receive Calculator Lead",
+      "description": "Triggered when someone completes the revenue calculator",
+      "data": {
+        "hook_name": "revenue_calculator_lead",
+        "structure": [
+          {
+            "name": "tier",
+            "type": "text",
+            "label": "Lead Tier"
+          },
+          {
+            "name": "lead",
+            "type": "collection",
+            "spec": [
+              {"name": "name", "type": "text"},
+              {"name": "email", "type": "email"},
+              {"name": "company", "type": "text"},
+              {"name": "website", "type": "url"},
+              {"name": "monthlyLeads", "type": "number"},
+              {"name": "averageDealSize", "type": "number"},
+              {"name": "currentCloseRate", "type": "number"},
+              {"name": "revenueLeak", "type": "number"}
+            ]
+          },
+          {
+            "name": "source",
+            "type": "text"
+          },
+          {
+            "name": "timestamp",
+            "type": "date"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "router:Router",
+      "name": "Route by Lead Tier",
+      "mapper": {
+        "tier": "{{1.tier}}"
+      },
+      "routes": [
+        {
+          "name": "VIP Leads",
+          "filter": {
+            "conditions": [
+              {
+                "a": "{{1.tier}}",
+                "b": "vip",
+                "o": "equal"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Standard Leads",
+          "filter": {
+            "conditions": [
+              {
+                "a": "{{1.tier}}",
+                "b": "standard",
+                "o": "equal"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Discovery Leads",
+          "filter": {
+            "conditions": [
+              {
+                "a": "{{1.tier}}",
+                "b": "discovery",
+                "o": "equal"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Workshop Leads",
+          "filter": {
+            "conditions": [
+              {
+                "a": "{{1.tier}}",
+                "b": "workshop",
+                "o": "equal"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "module": "http:ActionSendData",
+      "name": "Enrich Lead Data",
+      "description": "Call your /enrich API to get company data",
+      "mapper": {
+        "url": "http://YOUR_SERVER:5000/enrich",
+        "method": "POST",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "domain": "{{parseURL(1.lead.website; 2)}}",
+          "company": "{{1.lead.company}}"
+        },
+        "parseResponse": true
+      }
+    },
+    {
+      "id": 4,
+      "module": "builtin:BasicAggregator",
+      "name": "Combine Calculator + Enrichment Data",
+      "mapper": {
+        "sourceModule": [1, 3],
+        "targetModule": 5
+      }
+    },
+    {
+      "id": 5,
+      "module": "router:Router",
+      "name": "Send to CRM + Notifications",
+      "routes": [
+        {
+          "name": "To CRM"
+        },
+        {
+          "name": "VIP Slack Alert",
+          "filter": {
+            "conditions": [
+              {
+                "a": "{{1.tier}}",
+                "b": "vip",
+                "o": "equal"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "module": "REPLACE_WITH_YOUR_CRM:CreateContact",
+      "name": "Add to CRM",
+      "description": "Replace with HubSpot, Salesforce, or your CRM",
+      "mapper": {
+        "email": "{{1.lead.email}}",
+        "firstname": "{{first(split(1.lead.name; \" \"))}}",
+        "lastname": "{{last(split(1.lead.name; \" \"))}}",
+        "company": "{{1.lead.company}}",
+        "website": "{{1.lead.website}}",
+        "custom_fields": {
+          "lead_source": "Revenue Calculator",
+          "lead_tier": "{{1.tier}}",
+          "monthly_leads": "{{1.lead.monthlyLeads}}",
+          "average_deal_size": "{{1.lead.averageDealSize}}",
+          "current_close_rate": "{{1.lead.currentCloseRate}}",
+          "revenue_leak": "{{1.lead.revenueLeak}}",
+          "employee_count": "{{3.employee_count}}",
+          "annual_revenue": "{{3.annual_revenue}}",
+          "technologies": "{{join(3.technologies; \", \")}}",
+          "icp_score": "{{3.icp_score}}"
+        },
+        "tags": [
+          "Revenue Calculator",
+          "{{capitalize(1.tier)}} Lead",
+          "Calculator {{formatDate(now; \"YYYY-MM\")}}"
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "module": "slack:CreateMessage",
+      "name": "Send VIP Alert to Slack",
+      "description": "Only triggers for VIP leads",
+      "mapper": {
+        "channel": "#vip-leads",
+        "text": "🔥 VIP LEAD ALERT",
+        "blocks": [
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "*🔥 VIP Lead: {{1.lead.name}}*\n\n*Company:* {{1.lead.company}}\n*Revenue Leak:* ${{formatNumber(1.lead.revenueLeak; 0; \",\")}}/year\n*Monthly Leads:* {{1.lead.monthlyLeads}}\n*ICP Score:* {{3.icp_score}}/100\n\n*Contact:*\n• Email: {{1.lead.email}}\n• Website: {{1.lead.website}}\n\n*Enriched Data:*\n• Employees: {{3.employee_count}}\n• Revenue: ${{formatNumber(3.annual_revenue; 0; \",\")}}\n• Tech Stack: {{join(3.technologies; \", \")}}"
+            }
+          },
+          {
+            "type": "actions",
+            "elements": [
+              {
+                "type": "button",
+                "text": {
+                  "type": "plain_text",
+                  "text": "View in CRM"
+                },
+                "url": "{{6.contact_url}}"
+              },
+              {
+                "type": "button",
+                "text": {
+                  "type": "plain_text",
+                  "text": "Call Now"
+                },
+                "url": "tel:{{1.lead.phone}}"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "module": "email:SendEmail",
+      "name": "Send Welcome Email",
+      "description": "Personalized email based on tier",
+      "mapper": {
+        "to": "{{1.lead.email}}",
+        "from": "your-email@yourdomain.com",
+        "fromName": "Your Name",
+        "subject": {
+          "vip": "{{1.lead.name}}, let's capture that ${{formatNumber(1.lead.revenueLeak; 0; \",\")}}",
+          "standard": "Here's how to fix your revenue leak, {{1.lead.name}}",
+          "discovery": "Quick question about your revenue goals",
+          "workshop": "You're registered for our Revenue Workshop"
+        }["{{1.tier}}"],
+        "html": "<!-- Use your email template here -->",
+        "text": "Personalized email content based on tier"
+      }
+    },
+    {
+      "id": 9,
+      "module": "google-sheets:AddRow",
+      "name": "Log to Lead Tracker",
+      "description": "Optional: Keep a Google Sheet log",
+      "mapper": {
+        "spreadsheetId": "YOUR_SPREADSHEET_ID",
+        "sheetName": "Leads",
+        "values": [
+          "{{formatDate(now; \"YYYY-MM-DD HH:mm:ss\")}}",
+          "{{1.lead.name}}",
+          "{{1.lead.email}}",
+          "{{1.lead.company}}",
+          "{{1.tier}}",
+          "{{1.lead.revenueLeak}}",
+          "{{1.lead.monthlyLeads}}",
+          "{{1.lead.averageDealSize}}",
+          "{{1.lead.currentCloseRate}}",
+          "{{3.icp_score}}",
+          "{{3.employee_count}}",
+          "Revenue Calculator"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    }
+  },
+  "instructions": {
+    "setup": [
+      "1. Import this blueprint into Make.com",
+      "2. Copy the webhook URL from module #1",
+      "3. Paste it into widgets/smart-booking-config.js line 156",
+      "4. Connect your CRM in module #6 (replace REPLACE_WITH_YOUR_CRM)",
+      "5. Configure Slack webhook in module #7 (optional)",
+      "6. Set up email sending in module #8",
+      "7. Connect Google Sheets in module #9 (optional)",
+      "8. Update enrichment API URL in module #3 with your server",
+      "9. Test the flow with a test lead",
+      "10. Activate the scenario"
+    ],
+    "testing": [
+      "Test with these scenarios:",
+      "1. VIP lead (100+ leads, $100K+ leak)",
+      "2. Standard lead (50 leads, $50K leak)",
+      "3. Discovery lead (20 leads, $15K leak)",
+      "4. Workshop lead (5 leads, $5K leak)",
+      "Verify each tier routes correctly and triggers appropriate actions"
+    ]
+  },
+  "notes": "This blueprint integrates the Smart Revenue Calculator with your CRM, enrichment API, and notification systems. It automatically qualifies, enriches, and routes leads based on their potential value."
+}
