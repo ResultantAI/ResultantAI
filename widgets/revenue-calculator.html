@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revenue Calculator - Find Your Revenue Leak</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calculator-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #1a202c;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f7fafc;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        .result-container {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin: 30px 0;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .result-container.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .result-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .result-amount {
+            color: white;
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-message {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .cta-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .cta-button:active {
+            transform: translateY(0);
+        }
+
+        .assumptions {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .assumptions-title {
+            color: #2d3748;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .assumptions-text {
+            color: #718096;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .slider-container {
+            margin-top: 10px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 600px) {
+            .calculator-container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .result-amount {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <h1>💰 Revenue Leak Calculator</h1>
+        <p class="subtitle">Discover how much revenue you're leaving on the table</p>
+
+        <div class="input-group">
+            <label for="leads">How many leads do you get per month?</label>
+            <div class="input-wrapper">
+                <input type="number" id="leads" min="0" placeholder="e.g., 100" value="100">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="dealSize">What's your average deal size?</label>
+            <div class="input-wrapper">
+                <input type="number" id="dealSize" min="0" placeholder="e.g., 5000" value="5000">
+                <span class="input-suffix">$</span>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="closeRate">What's your current close rate?</label>
+            <div class="input-wrapper">
+                <input type="number" id="closeRate" min="0" max="100" step="0.1" placeholder="e.g., 10" value="10">
+                <span class="input-suffix">%</span>
+            </div>
+            <div class="slider-container">
+                <input type="range" id="closeRateSlider" min="0" max="100" step="0.1" value="10">
+            </div>
+        </div>
+
+        <div class="result-container" id="resultContainer">
+            <div class="result-label">You're Bleeding</div>
+            <div class="result-amount" id="resultAmount">$0</div>
+            <div class="result-message" id="resultMessage">per year in lost revenue</div>
+        </div>
+
+        <button class="cta-button" onclick="bookAudit()">
+            📞 Book Free Audit to Fix This
+        </button>
+
+        <div class="assumptions">
+            <div class="assumptions-title">💡 Our Calculation</div>
+            <div class="assumptions-text">
+                We calculate your potential revenue increase if you improved your close rate by just 10-15%.
+                Most businesses we work with see 20-40% improvement in close rates within 90 days.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const leadsInput = document.getElementById('leads');
+        const dealSizeInput = document.getElementById('dealSize');
+        const closeRateInput = document.getElementById('closeRate');
+        const closeRateSlider = document.getElementById('closeRateSlider');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultAmount = document.getElementById('resultAmount');
+        const resultMessage = document.getElementById('resultMessage');
+
+        // Sync slider with input
+        closeRateInput.addEventListener('input', (e) => {
+            closeRateSlider.value = e.target.value;
+            calculateRevenueLeak();
+        });
+
+        closeRateSlider.addEventListener('input', (e) => {
+            closeRateInput.value = e.target.value;
+            calculateRevenueLeak();
+        });
+
+        // Calculate on any input change
+        leadsInput.addEventListener('input', calculateRevenueLeak);
+        dealSizeInput.addEventListener('input', calculateRevenueLeak);
+
+        function calculateRevenueLeak() {
+            const leads = parseFloat(leadsInput.value) || 0;
+            const dealSize = parseFloat(dealSizeInput.value) || 0;
+            const closeRate = parseFloat(closeRateInput.value) || 0;
+
+            if (leads <= 0 || dealSize <= 0 || closeRate <= 0) {
+                resultContainer.classList.remove('show');
+                return;
+            }
+
+            // Current annual revenue
+            const currentMonthlyRevenue = leads * (closeRate / 100) * dealSize;
+            const currentAnnualRevenue = currentMonthlyRevenue * 12;
+
+            // Improved close rate (conservative 12.5% improvement)
+            const improvedCloseRate = Math.min(closeRate * 1.125, 100);
+            const improvedMonthlyRevenue = leads * (improvedCloseRate / 100) * dealSize;
+            const improvedAnnualRevenue = improvedMonthlyRevenue * 12;
+
+            // Calculate the leak
+            const revenueLeak = improvedAnnualRevenue - currentAnnualRevenue;
+
+            // Display result
+            resultAmount.textContent = formatCurrency(revenueLeak);
+
+            // Show result container with animation
+            resultContainer.classList.add('show');
+
+            // Update message based on amount
+            if (revenueLeak < 50000) {
+                resultMessage.textContent = 'per year in lost revenue';
+            } else if (revenueLeak < 250000) {
+                resultMessage.textContent = 'per year going down the drain';
+            } else {
+                resultMessage.textContent = 'per year you\'re missing out on';
+            }
+        }
+
+        function formatCurrency(amount) {
+            if (amount >= 1000000) {
+                return '$' + (amount / 1000000).toFixed(2) + 'M';
+            } else if (amount >= 1000) {
+                return '$' + (amount / 1000).toFixed(0) + 'K';
+            } else {
+                return '$' + amount.toFixed(0);
+            }
+        }
+
+        function bookAudit() {
+            // Replace this URL with your actual booking link
+            // Options: Calendly, Cal.com, or your contact form
+            const bookingURL = 'https://calendly.com/your-calendar-link'; // UPDATE THIS
+
+            // You can also customize this to open a modal, form, etc.
+            window.open(bookingURL, '_blank');
+
+            // Optional: Track conversion event
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'click', {
+                    'event_category': 'CTA',
+                    'event_label': 'Book Free Audit'
+                });
+            }
+        }
+
+        // Initialize calculation on page load
+        calculateRevenueLeak();
+    </script>
+</body>
+</html>

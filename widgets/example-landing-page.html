@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculate Your Revenue Leak | Free Business Audit</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f8fafc;
+            color: #1a202c;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            opacity: 0.95;
+        }
+
+        .calculator-section {
+            max-width: 1200px;
+            margin: -50px auto 60px;
+            padding: 0 20px;
+        }
+
+        .calculator-wrapper {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .features {
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .feature-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #1a202c;
+        }
+
+        .feature-description {
+            font-size: 16px;
+            color: #718096;
+            line-height: 1.6;
+        }
+
+        .social-proof {
+            background: #667eea;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .social-proof h3 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 800;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                gap: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <h1>How Much Revenue Are You Losing?</h1>
+        <p>Most businesses leave 6-7 figures on the table every year. Find out exactly how much in 60 seconds.</p>
+    </section>
+
+    <section class="calculator-section">
+        <div class="calculator-wrapper">
+            <!-- EMBED THE CALCULATOR HERE -->
+            <iframe
+                src="revenue-calculator.html"
+                width="100%"
+                height="900"
+                frameborder="0"
+                style="border: none; display: block;"
+            ></iframe>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <div class="feature-title">60-Second Analysis</div>
+            <div class="feature-description">
+                Get instant insights into your revenue leaks without complex spreadsheets or consultations.
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <div class="feature-title">Data-Driven Results</div>
+            <div class="feature-description">
+                Our calculator uses proven industry benchmarks and conservative estimates to show realistic improvements.
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <div class="feature-title">Actionable Next Steps</div>
+            <div class="feature-description">
+                Book a free audit and we'll create a custom roadmap to capture that lost revenue in 90 days.
+            </div>
+        </div>
+    </section>
+
+    <section class="social-proof">
+        <h3>Trusted by Growing Businesses</h3>
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-number">500+</span>
+                <span class="stat-label">Businesses Analyzed</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">$12M+</span>
+                <span class="stat-label">Revenue Recovered</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">90 Days</span>
+                <span class="stat-label">Average Time to Results</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Optional: Add testimonials, FAQ, footer, etc. -->
+</body>
+</html>
